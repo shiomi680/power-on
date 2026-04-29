@@ -1,238 +1,171 @@
-# 実装タスク: ghcr.io プリビルト・イメージ・ワンコマンド・デプロイメント
+# タスク一覧: ghcr.io プリビルト・イメージ・ワンコマンド・デプロイメント
 
-**機能**: ghcr.io プリビルト・イメージ・ワンコマンド・デプロイメント  
-**ブランチ**: `004-ghcr-quick-deploy`  
-**総タスク数**: 20  
-**実装戦略**: MVP スコープ（US1 + US2 = 初心者 + 本番デプロイ）、その後 US3（ローカル・ビルド）を追加。各USでテスト仕様定義 → 実装 → テスト実行（Red-Green-Refactor）
+**フィーチャー**: 004-ghcr-quick-deploy  
+**作成日**: 2026-04-30  
+**仕様**: [spec.md](spec.md) | **計画**: [plan.md](plan.md)
+
+**入力**: `/specs/004-ghcr-quick-deploy/spec.md` の 3 つのユーザーストーリー (US1 P1, US2 P1, US3 P2)
+
+**組織**: タスクはユーザーストーリー別に整理。各ストーリーを独立して実装・テスト・納品可能に。
+
+## フォーマット: `- [ ] [ID] [P?] [Story?] 説明: ファイルパス`
+
+- **[P]**: 並行実行可能（異なるファイル・依存なし）
+- **[Story]**: ユーザーストーリー（US1, US2, US3）
+- 説明には正確なファイルパス・コマンドを含める
+
+---
+
+## フェーズ 1: セットアップ（共有インフラ）
+
+**目的**: プロジェクト初期化・基本構造確認
+
+- [ ] T001 プロジェクト構造確認: .env.example、docker-compose.yml、version.json、.github/workflows/ が存在
+- [ ] T002 既存 README.md を確認: 現在のクイックスタート・セクション・デプロイメント手順をレビュー
+
+---
+
+## フェーズ 2: ユーザーストーリー 1 - ワンコマンド・デプロイ (P1) 🎯 MVP
+
+**目標**: 初心者ユーザーが `docker compose up` でシステムを 2 分以内に起動可能に
+
+**独立テスト基準**:
+- docker-compose.yml で ghcr.io イメージ（v1.0.0）を参照
+- README にクイックスタート・セクション（git clone → .env → docker compose up）が明記
+- docker compose up でシステムが起動し、ヘルスチェック・エンドポイントに正常応答
+
+### ユーザーストーリー 1 - 実装
+
+- [ ] T003 [US1] README.md 更新: **クイックスタート（5分）** セクションを追加 - git clone → .env.example コピー → .env 編集 → docker compose up フロー
+- [ ] T004 [US1] README.md 更新: docker-compose.yml での ghcr.io イメージ参照例・docker pull コマンド説明を追加
+- [ ] T005 [US1] docker-compose.yml 確認: raspi-wol サービスが `ghcr.io/shiomi680/power-on-rpi:v1.0.0` を参照していることを確認
+- [ ] T006 [US1] docker-compose.yml 確認: pc-power サービスが `ghcr.io/shiomi680/power-on-pc:v1.0.0` を参照していることを確認
+- [ ] T007 [US1] README.md 追加: ヘルスチェック・エンドポイント確認コマンド - `curl http://localhost:5000/api/health`、`curl http://localhost:5001/api/health`
+- [ ] T008 [US1] テスト実行: docker compose up → 両サービス起動確認 → ヘルスチェック確認（US1 受け入れシナリオ検証）
+
+---
+
+## フェーズ 3: ユーザーストーリー 2 - バージョン・ピン (P1)
+
+**目標**: 本番運用ユーザーが検証済みイメージバージョンをピン指定してデプロイ可能に
+
+**独立テスト基準**:
+- docker-compose.yml で明確なバージョン・タグ（v1.0.0）が指定
+- README に「本番環境でのバージョン・ピン指定」セクションが記載
+- タグを切り替えて docker compose up で異なるバージョンが起動可能
+
+### ユーザーストーリー 2 - 実装
+
+- [ ] T009 [US2] docker-compose.yml 確認: イメージ・タグが明確に v1.0.0 指定（または .env から動的参照確認）
+- [ ] T010 [US2] README.md 追加: **本番環境でのバージョン・ピン指定** セクション - バージョン・タグ切り替え方法（docker-compose.yml 直接編集またはシェル変数例）
+- [ ] T011 [US2] README.md 追加: version.json 役割説明・バージョン確認方法 (`cat version.json`)
+- [ ] T012 [US2] テスト実行: docker-compose.yml タグを v1.0.0 → v1.1.0（架空）に変更して docker compose up が新バージョンを引く動作確認
+
+---
+
+## フェーズ 4: ユーザーストーリー 3 - ローカル・ビルド代替路 (P2)
+
+**目標**: 開発者がカスタマイズ後、ローカル・ビルド・オプションで独自イメージを構築・デプロイ可能に
+
+**独立テスト基準**:
+- docker-compose.local.yml が作成され、`build:` オプションで Dockerfile を参照
+- README に「ローカル・ビルド・カスタマイズ」セクションが記載
+- docker compose -f docker-compose.local.yml up でローカル・イメージから起動可能
+
+### ユーザーストーリー 3 - 実装
+
+- [ ] T013 [P] [US3] docker-compose.local.yml を作成（ルート）: rpi-wol・pc-power の `build: { context: ./rpi-wol, dockerfile: Dockerfile }`・`build: { context: ./pc-power, dockerfile: Dockerfile }` オプション指定
+- [ ] T014 [P] [US3] rpi-wol/docker-compose.local.yml を作成: raspi 単体ローカル・ビルド・パターン - `image: power-on-rpi:local`、`build: { context: ., dockerfile: Dockerfile }`
+- [ ] T015 [P] [US3] pc-power/docker-compose.local.yml を作成: pc 単体ローカル・ビルド・パターン - `image: power-on-pc:local`、`build: { context: ., dockerfile: Dockerfile }`
+- [ ] T016 [US3] README.md 追加: **開発・カスタマイズ（ローカル・ビルド）** セクション - docker-compose.local.yml 使用方法・`docker compose -f docker-compose.local.yml up -d` コマンド例
+- [ ] T017 [US3] README.md 追加: Dockerfile 修正例・docker build コマンド（`docker build -t power-on-rpi:local ./rpi-wol`）・docker compose.local.yml で起動方法
+- [ ] T018 [US3] テスト実行: docker-compose.local.yml で docker compose up が実行可能であることを確認（US3 受け入れシナリオ検証）
+
+---
+
+## フェーズ 5: ポーランド - アーキテクチャ・セクション分離
+
+**目的**: README を整理し、想定構成・プラットフォーム別インストール・セクションを分離
+
+### ポーランド・タスク
+
+- [ ] T019 README.md 更新: **想定構成・アーキテクチャ** セクションを追加
+  - システム・コンポーネント説明: raspi-wol（WOL マジックパケット送信）、pc-power（電源制御 API）、PC（対象マシン）
+  - 通信フロー: Raspberry Pi → PC_ADDRESS（ネットワーク経由）→ PC（WOL/シャットダウン）
+  - ネットワーク構成例: `192.168.1.x` 範囲での Raspberry Pi・PC 配置
+
+- [ ] T020 [P] rpi-wol/docker-compose.yml を作成（新規）: raspi 独立構成
+  - イメージ: `ghcr.io/shiomi680/power-on-rpi:v1.0.0`
+  - ポート: 5000
+  - 環境変数: `PC_ADDRESS`、`WOL_TARGET_MAC`、`WOL_BROADCAST_IP`
+
+- [ ] T021 [P] pc-power/docker-compose.yml を作成（新規）: pc 独立構成
+  - イメージ: `ghcr.io/shiomi680/power-on-pc:v1.0.0`
+  - ポート: 5001
+  - 環境変数: `SHUTDOWN_TIMEOUT`
+
+- [ ] T022 README.md セクション再構成・統合:
+  - 目次更新
+  - **クイックスタート（5分）** - 両サービス統合デプロイ
+  - **想定構成・アーキテクチャ** - システム概要（T019 で作成）
+  - **Raspberry Pi インストール** - PC_ADDRESS、WOL_TARGET_MAC 設定・raspi 単体デプロイ（rpi-wol/docker-compose.yml）
+  - **PC インストール** - pc 単体デプロイ方法（pc-power/docker-compose.yml）
+  - **ローカル・ビルド・カスタマイズ** - docker-compose.local.yml 使用方法（T016 で作成）
+  - **トラブルシューティング** - 既存セクション保持
+  - **参考資料** - DOCKER.md、CI-CD.md リンク
+
+- [ ] T023 README.md 最終確認: すべてのコマンド例・ファイルパス・構成が正確・完全であることを検証
 
 ---
 
 ## 依存関係・実行順序
 
-### ストーリー依存関係
-
 ```
-フェーズ 2（基盤） ─→ フェーズ 3（US1）─┐
-                      フェーズ 4（US2）├→ フェーズ 5（US3）→ フェーズ 6（Polish）
+フェーズ 1: セットアップ (T001-T002)
+    ↓
+フェーズ 2: US1 - ワンコマンド・デプロイ (T003-T008)
+    ↓ 依存
+フェーズ 3: US2 - バージョン・ピン (T009-T012) [並行可]
+    ↓
+フェーズ 4: US3 - ローカル・ビルド (T013-T018) [T013-T015 並行可]
+    ↓
+フェーズ 5: ポーランド - アーキテクチャ・セクション分離 (T019-T023) [T020-T021 並行可]
 ```
 
-### 並列実行
-
-- **フェーズ 2**: T002-T005 並列化可能 [P]
-- **フェーズ 3（US1）**: T006（テスト仕様） → T007-T009（実装、並列化可能 [P]） → T010（テスト実行）
-- **フェーズ 4（US2）**: T011（テスト仕様） → T012-T013（実装、並列化可能 [P]） → T014（テスト実行）
-- **フェーズ 5（US3）**: T015（テスト仕様） → T016-T017（実装、並列化可能 [P]） → T018（テスト実行）
-
----
-
-## フェーズ 1: セットアップ
-
-### 目標
-ドキュメント・修正・追加の準備。
-
-### 独立テスト基準
-- 既存の README.md が保持・バージョン管理中
-- docker-compose.yml が存在・更新可能な状態
-- .env.example が存在
-
-### タスク
-
-- [ ] T001 既存の README.md、docker-compose.yml、.env.example が無傷か確認・バックアップを取得
-
----
-
-## フェーズ 2: 基盤（ブロッキング前提条件）
-
-### 目標
-README 基本構造と docker-compose.yml を ghcr.io イメージ参照に更新。
-
-### 独立テスト基準
-- README に「クイックスタート」セクション・スタブが存在
-- docker-compose.yml が ghcr.io イメージを参照（image: ghcr.io/...）
-- .env.example に全環境変数が列挙
-
-### タスク
-
-- [ ] T002 [P] README.md の先頭に「クイックスタート」セクションのスタブを作成 (README.md クイックスタート・セクション)
-- [ ] T003 [P] docker-compose.yml で rpi-wol の ghcr.io イメージを参照するように更新（image: ghcr.io/shiomi680/power-on-rpi:v1.0.0） (docker-compose.yml services.rpi-wol)
-- [ ] T004 [P] docker-compose.yml で pc-power の ghcr.io イメージを参照するように更新（image: ghcr.io/shiomi680/power-on-pc:v1.0.0） (docker-compose.yml services.pc-power)
-- [ ] T005 [P] .env.example に PC_ADDRESS、WOL_TARGET_MAC、WOL_BROADCAST_IP、FLASK_PORT、LOG_LEVEL、SHUTDOWN_TIMEOUT を記載 (.env.example)
-
----
-
-## フェーズ 3: ユーザーストーリー 1 - git clone → docker compose up [P1]
-
-### ストーリー目標
-初心者ユーザーが git clone → .env 設定 → docker compose up の 3 ステップでシステムを起動できるようにする。
-
-### 受け入れ基準（仕様書より）
-1. README のクイックスタート・セクションに git clone 手順が記載
-2. 初心者ユーザーが README の手順に従って 5-10 分以内にシステムを起動可能（SC-002: 2 分以内）
-3. ヘルスチェック・エンドポイントが正常に応答
-
-### 独立テスト基準
-- README クイックスタート・セクションが git clone → .env 設定 → docker compose up を説明
-- すべてのコマンドがコピペ可能・テスト済み
-- 期待される出力・成功インジケータが明示
-
-### タスク
-
-- [ ] T006 [US1] テスト仕様定義：quickstart.md「シナリオ 1: Git Clone」の検証手順を README テストテンプレートに記載 (README.md クイックスタート・セクション)
-  - git clone 実行時の期待される出力（"Cloning into 'power-on'"）
-  - ls -la で README.md、docker-compose.yml、rpi-wol/、pc-power/ が存在
-  - .env ファイルコピー・編集方法
-  - docker compose up -d 実行後の期待される状態
-  - curl http://localhost:5000/api/health と curl http://localhost:5001/api/health が 200 OK を返す
-
-- [ ] T007 [P] [US1] README「クイックスタート」セクションに git clone https://github.com/shiomi680/power-on && cd power-on の手順を記載 (README.md クイックスタート・セクション)
-
-- [ ] T008 [P] [US1] README「クイックスタート」セクションに cp .env.example .env と環境変数編集（PC_ADDRESS、WOL_TARGET_MAC）をドキュメント化 (README.md クイックスタート・セクション)
-
-- [ ] T009 [P] [US1] README「クイックスタート」セクションに docker compose up -d と 2 分以内の起動確認、ヘルスチェック（curl http://localhost:5000/api/health、curl http://localhost:5001/api/health）をドキュメント化 (README.md クイックスタート・セクション)
-
-- [ ] T010 [US1] テスト実行・検証：T006 で定義した検証手順に基づいて、README「クイックスタート」セクションのコマンドを実際に実行し、すべての期待される結果が得られることを確認 (README.md クイックスタート・セクション)
-
----
-
-## フェーズ 4: ユーザーストーリー 2 - バージョン・ピン指定（本番向け） [P1]
-
-### ストーリー目標
-本番運用ユーザーが特定の検証済みイメージバージョン（v1.0.0 等）をピン指定してデプロイし、再現性を確保できるようにする。
-
-### 受け入れ基準（仕様書より）
-1. README に特定バージョン・タグ（v1.0.0）のピン指定方法が説明
-2. docker-compose.yml で具体的なバージョン・タグが指定可能
-3. バージョン・タグの切り替え（v1.0.0 → v1.1.0）が可能で動作確認
-
-### 独立テスト基準
-- README に「本番デプロイメント向けバージョン・ピン指定」セクションが存在
-- docker-compose.yml で image: ghcr.io/shiomi680/power-on-rpi:v1.0.0 ように具体的バージョンが指定
-- 複数バージョン・タグでの切り替え方法が明確
-
-### タスク
-
-- [ ] T011 [US2] テスト仕様定義：quickstart.md「シナリオ 2: バージョン・ピン指定」の検証手順を README テストテンプレートに記載 (README.md 本番環境セクション)
-  - docker-compose.yml で image: ghcr.io/shiomi680/power-on-rpi:v1.0.0 が指定されていることを確認（grep image:）
-  - 複数バージョン（v1.0.0、v1.1.0）への切り替え方法が明確
-  - バージョン切り替え後、docker compose up -d で正しいバージョンが起動される
-
-- [ ] T012 [P] [US2] README に「本番環境でのバージョン・ピン指定」セクションを追加し、docker-compose.yml での image: ghcr.io/shiomi680/power-on-rpi:v1.0.0 指定方法を説明 (README.md 本番環境セクション)
-
-- [ ] T013 [P] [US2] README に異なるバージョン・タグ（v1.0.0、v1.1.0 等）への切り替え方法を記載し、再現性確保の重要性を説明 (README.md 本番環境セクション)
-
-- [ ] T014 [US2] テスト実行・検証：T011 で定義した検証手順に基づいて、docker-compose.yml のバージョン指定が正しいこと、複数バージョン切り替えが可能であることを確認 (README.md 本番環境セクション)
-
----
-
-## フェーズ 5: ユーザーストーリー 3 - ローカル・ビルド代替路 [P2]
-
-### ストーリー目標
-開発者がコード修正後、ローカル・ビルド・オプションで独自イメージを作成・テストできるようにする。
-
-### 受け入れ基準（仕様書より）
-1. README に docker build ワークフローが説明
-2. ローカル・ビルド・イメージで docker-compose を使用して起動可能
-3. build: オーバーライドまたは docker-compose.local.yml パターンが示されている
-
-### 独立テスト基準
-- README に「開発・カスタマイズ（ローカル・ビルド）」セクションが存在
-- docker build コマンドがコピペ可能・テスト済み
-- ローカル・ビルド・イメージでの docker-compose 参照方法が明確
-
-### タスク
-
-- [ ] T015 [US3] テスト仕様定義：quickstart.md「シナリオ 3: ローカル・ビルド」の検証手順を README テストテンプレートに記載 (README.md 開発・カスタマイズセクション)
-  - docker build -t power-on-rpi:dev ./rpi-wol 実行時の期待される出力
-  - docker build -t power-on-pc:dev ./pc-power 実行時の期待される出力
-  - docker-compose.local.yml での build: override パターン
-  - docker compose -f docker-compose.local.yml up -d でローカル・イメージが起動される
-
-- [ ] T016 [P] [US3] README に「開発・カスタマイズ（ローカル・ビルド）」セクションを追加し、docker build -t power-on-rpi:dev ./rpi-wol と docker build -t power-on-pc:dev ./pc-power コマンドを記載 (README.md 開発・カスタマイズセクション)
-
-- [ ] T017 [P] [US3] README に docker-compose.local.yml で build: ./rpi-wol、build: ./pc-power をオーバーライドするパターン、またはローカル・イメージでの起動方法（docker compose -f docker-compose.local.yml up -d）を記載 (README.md 開発・カスタマイズセクション)
-
-- [ ] T018 [US3] テスト実行・検証：T015 で定義した検証手順に基づいて、docker build コマンドが成功し、docker-compose.local.yml でローカル・イメージが起動できることを確認 (README.md 開発・カスタマイズセクション)
-
----
-
-## フェーズ 6: ポーランド・クロスカッティング
-
-### 目標
-仕上げ、検証、トラブルシューティング・セクション追加。
-
-### タスク
-
-- [ ] T019 README.md に「トラブルシューティング」セクションを追加し、以下を記載:
-  - イメージ・プル失敗時の対処（docker pull ... が失敗）
-  - ポート競合時の対処（port ... already in use）
-  - ネットワーク接続エラー対処（PC_ADDRESS に到達不可）
-  - ヘルスチェック失敗時の診断
-  - レジストリ認証エラー対処（認証が必要な場合）
-  (README.md トラブルシューティング・セクション)
-
-- [ ] T020 README 全体の整合性・トーン・明確性を校正・確認し、すべてのコマンド例がテスト済みであることを検証 (README.md 全体)
-
----
-
-## 実装戦略
-
-### MVP スコープ（推奨・最初のイテレーション）
-**タスク**: T001-T014（約 3-4 時間）
-- ✅ フェーズ 1: セットアップ
-- ✅ フェーズ 2: 基盤（README header + docker-compose.yml 更新）
-- ✅ フェーズ 3: US1（テスト仕様定義 → 実装 → テスト実行）
-- ✅ フェーズ 4: US2（テスト仕様定義 → 実装 → テスト実行）
-
-**成果**: ghcr.io イメージを初心者向けワンコマンド・デプロイメントとして確立。本番環境はバージョン・ピン指定で再現性確保。Red-Green-Refactor サイクルで検証済み。
-
-### フル・スコープ（2 番目のイテレーション）
-**タスク**: T015-T020（約 2-3 時間）
-- ✅ フェーズ 5: US3（テスト仕様定義 → 実装 → テスト実行）
-- ✅ フェーズ 6: ポーランド・トラブルシューティング
-
-**成果**: 完全なデプロイメント・ドキュメント（初心者 + 本番 + 開発・カスタマイズ）。すべての US で Red-Green-Refactor サイクル完備。
-
----
-
-## サマリー
-
-| 指標 | 値 |
-|------|-----|
-| 総タスク数 | 20 |
-| MVP タスク（US1 + US2） | 14 |
-| セットアップ・フェーズ | 1 タスク |
-| 基盤フェーズ | 4 タスク |
-| US1（git clone デプロイ） [P1] | 5 タスク（テスト仕様+実装 3+実行） |
-| US2（バージョン・ピン指定） [P1] | 4 タスク（テスト仕様+実装 2+実行） |
-| US3（ローカル・ビルド） [P2] | 4 タスク（テスト仕様+実装 2+実行） |
-| ポーランド・フェーズ | 2 タスク |
-| 並列化可能なタスク | 9（[P] でマーク：実装タスク群） |
-| 推定時間（MVP） | 3～4 時間 |
-| 推定時間（フル） | 5～6 時間 |
-
----
-
-## 要件へのカバレッジ・マッピング
-
-### 機能要件 → タスク
-
-| 要件 | タスク | カバレッジ |
-|------|--------|----------|
-| FR-001: docker pull コマンドを明記 | T006（仕様定義）、T007-T009（実装）、T010（検証） | ✅ |
-| FR-002: docker-compose.yml で ghcr.io イメージを参照 | T003-T004、T007-T009 | ✅ |
-| FR-003: バージョン・ピン指定方法 | T011（仕様定義）、T012-T013（実装）、T014（検証） | ✅ |
-| FR-004: ghcr.io がデフォルト推奨方法 | T006-T010、T012-T014 | ✅ |
-| FR-005: ローカル・ビルド代替方法を記載 | T015（仕様定義）、T016-T017（実装）、T018（検証） | ✅ |
-| FR-006: docker-compose.yml で ghcr.io デフォルト参照 | T003-T004 | ✅ |
-| FR-007: イメージ取得失敗時のトラブルシューティング | T019 | ✅ |
-| FR-008: git clone で入手可能な状態を確保 | T002、T006-T010 | ✅ |
-
-### 成功基準 → 検証
-
-| 成功基準 | 検証タスク | 期待される成果 |
-|---------|-----------|-------------|
-| SC-001: docker pull コマンド 1 行でイメージ取得可能 | T006-T010 | docker pull がコピペ可能・実装・テスト検証済み |
-| SC-002: 2 分以内にシステム起動可能 | T009、T010 | docker compose up の実装・テスト検証済み（2分以内を実測確認） |
-| SC-003: README だけでローカル・ビルド実行可能 | T015-T018 | docker build・docker-compose override パターン明確・テスト検証済み |
-| SC-004: ghcr.io がデフォルト推奨方法として表示 | T006-T010、T012-T014 | README クイックスタート・本番セクションで確認・テスト検証済み |
-| SC-005: ビルド・ツールなしにデプロイ可能 | T007-T010 | ghcr.io イメージ使用で build 不要・テスト検証済み |
+## タスク統計
+
+- **総タスク数**: 23
+- **セットアップ・タスク**: 2 (T001-T002)
+- **US1 タスク**: 6 (T003-T008)
+- **US2 タスク**: 4 (T009-T012)
+- **US3 タスク**: 6 (T013-T018)
+- **ポーランド・タスク**: 5 (T019-T023)
+
+## 並行実行機会
+
+- **T013-T015**: docker-compose.local.yml ファイル作成（異なるファイル・依存なし）
+- **T020-T021**: コンポーネント別 docker-compose.yml 作成（異なるディレクトリ・依存なし）
+
+## 推奨 MVP スコープ
+
+**MVP**: US1 + US2 + アーキテクチャ概要
+- フェーズ 1-3: T001-T012
+- フェーズ 5: T019、T022-T023
+
+**完全版**: すべてのユーザーストーリー + ローカル・ビルド
+- フェーズ 1-5: T001-T023
+- US3（ローカル・ビルド）はマイナー機能で P2 優先度
+
+## フォーマット検証
+
+✅ **すべてのタスクは以下フォーマットに従う**:
+- `- [ ]` チェックボックス（未完了）
+- `T###` タスク ID
+- `[P]` 並行可能な場合のみ表示
+- `[Story]` ユーザーストーリー・ラベル（US1、US2、US3）
+- ファイルパス付き説明（正確なディレクトリ・ファイル名）
+
+**サンプル準拠例**:
+- ✅ `- [ ] T003 [US1] README.md 更新: クイックスタート・セクションを追加`
+- ✅ `- [ ] T013 [P] [US3] docker-compose.local.yml を作成: build オプション指定`
+- ✅ `- [ ] T020 [P] rpi-wol/docker-compose.yml を作成: ghcr.io イメージ参照`
