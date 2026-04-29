@@ -70,7 +70,7 @@
 - **FR-005**: README にローカル・ビルド方法を代替オプションとして記載（ビルド手順・ファイル参照）
 - **FR-006**: docker-compose.yml で ghcr.io イメージを デフォルト参照（ローカル・ビルド・オーバーライド可能）
 - **FR-007**: イメージ取得失敗時のトラブルシューティング・ガイド（レジストリ認証、プロキシ設定）を追加
-- **FR-008**: イメージ・バージョン・リリース・ノート・リンク（GitHub Releases）をドキュメント化
+- **FR-008**: docker-compose.yml は git clone で入手可能で、ghcr.io イメージがピン指定されており、.env.example から .env を編集することで即座に docker compose up で起動可能な状態を確保
 
 ### 成功基準 *(必須)*
 
@@ -89,6 +89,23 @@
 - イメージはパブリック・レジストリ（認証不要）として利用可能
 - 既存のデプロイメント・ドキュメント（README.md）で更新対応
 - ローカル・ビルド・パス（Dockerfile、docker-compose.yml）は継続利用可能
+- docker-compose.yml は git リポジトリに単一の出典として保存
+
+## デプロイメント・アプローチ
+
+**方式**: Git Clone（シンプル）
+- docker-compose.yml は git repository で管理
+- ユーザーは git clone してそのまま使用
+- Release assets への含含は行わない（複雑性回避）
+
+**フロー**:
+```bash
+git clone https://github.com/shiomi680/power-on
+cd power-on
+cp .env.example .env
+# (編集: PC_ADDRESS、WOL_TARGET_MAC を環境に応じて設定)
+docker compose up -d
+```
 
 ## 依存関係・前提
 
