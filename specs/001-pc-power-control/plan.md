@@ -7,12 +7,11 @@
 
 ## 概要
 
-Android から PC の電源を遠隔制御するシステム。3つの独立したコンポーネント：
-- **Raspberry Pi WOL サービス**: Flask を使用して Android からの電源ON リクエストを受け取り、WOL マジックパケットを PC に送信
-- **PC 電源管理サービス**: Flask を使用して Android からのシャットダウン・状態クエリリクエストを受け取る
-- **Android クライアント**: REST API を経由して両サービスと通信
+Web UI 経由で PC の電源を遠隔制御するシステム。2つの独立したコンポーネント：
+- **Raspberry Pi Web UI + WOL サービス**: Flask バックエンド + HTML/CSS/JavaScript フロントエンドで Web UI をホスト。ブラウザからのリクエストを受け取り、WOL マジックパケットを PC に送信、PC との通信を中継
+- **PC 電源管理サービス**: Flask を使用して Raspberry Pi からのシャットダウン・状態クエリリクエストを受け取る
 
-技術的アプローチ：各コンポーネントを独立したライブラリ + CLI として設計し、Library-First とテスト優先の原則に従う。
+技術的アプローチ：各コンポーネントを独立したライブラリ + CLI として設計し、Library-First とテスト優先の原則に従う。ユーザーは任意のブラウザで Raspberry Pi の Web UI にアクセスして制御。
 
 ## 技術文脈
 
@@ -36,11 +35,11 @@ Android から PC の電源を遠隔制御するシステム。3つの独立し�
 
 ### Principle II. Library-First
 - **ステータス**: ✅ PASS（設計段階で要確認）
-- **要件**: 3つの独立したライブラリ + CLI
-  - `power-on-rpi`: Raspberry Pi WOL サービス（ライブラリ + CLI）
-  - `power-on-pc`: PC シャットダウン/状態管理（ライブラリ + CLI）
-  - `power-on-android`: Android クライアント（ライブラリ + CLI）
+- **要件**: 2つの独立したライブラリ + CLI + Web UI
+  - `rpi-wol`: Raspberry Pi WOL サービス + Web UI（ライブラリ + CLI + Web フロントエンド）
+  - `pc-power`: PC シャットダウン/状態管理（ライブラリ + CLI）
 - **確認**: 各コンポーネントは自己完結、独立テスト可能、ドキュメント化
+- **ユーザーアクセス**: Web UI はブラウザ経由でアクセス（プラットフォーム非依存）
 
 ### Principle III. CLI Interface
 - **ステータス**: ✅ PASS（設計段階で要確認）
@@ -81,12 +80,26 @@ specs/001-pc-power-control/
 
 ```text
 power-on/                          # リポジトリルート
-├── rpi-wol/                       # Raspberry Pi WOL サービス（ライブラリ + CLI）
+├── rpi-wol/                       # Raspberry Pi Web UI + WOL サービス
 │   ├── src/
 │   │   ├── wol_service.py         # WOL コア機能ライブラリ
-│   │   ├── flask_app.py           # Flask アプリケーション
-│   │   ├── cli.py                 # CLI インターフェース
-│   │   └── config.py              # 設定管理
+│   │   ├── flask_app.py           # Flask バックエンド + Web UI ホスティング
+│   │   ├── cli.py                 # CLI インターフェース（デバッグ用）
+│   │   ├── api/                   # バックエンド API エンドポイント
+│   │   │   ├── __init__.py
+│   │   │   ├── power_on.py        # /api/power/on エンドポイント
+│   │   │   ├── status.py          # /api/status エンドポイント
+│   │   │   └── pc_proxy.py        # PC への API プロキシ
+│   │   ├── config.py              # 設定管理
+│   │   └── utils.py               # ヘルパー関数
+│   ├── static/                    # Web UI フロントエンド
+│   │   ├── css/
+│   │   │   └── style.css
+│   │   ├── js/
+│   │   │   └── app.js             # フロントエンド ロジック（AJAX など）
+│   │   └── images/                # アイコン等
+│   ├── templates/                 # HTML テンプレート
+│   │   └── index.html             # メイン Web UI
 │   ├── tests/
 │   │   ├── unit/
 │   │   │   ├── test_wol_service.py
@@ -99,12 +112,17 @@ power-on/                          # リポジトリルート
 │   ├── setup.py
 │   └── requirements.txt
 │
-├── pc-power/                      # PC 電源管理サービス（ライブラリ + CLI）
+├── pc-power/                      # PC 電源管理サービス
 │   ├── src/
 │   │   ├── power_manager.py       # PC シャットダウン/状態管理ライブラリ
-│   │   ├── flask_app.py           # Flask アプリケーション
+│   │   ├── flask_app.py           # Flask API サーバー
 │   │   ├── cli.py                 # CLI インターフェース
-│   │   └── config.py              # 設定管理
+│   │   ├── api/                   # API エンドポイント
+│   │   │   ├── __init__.py
+│   │   │   ├── shutdown.py        # /api/power/shutdown エンドポイント
+│   │   │   └── status.py          # /api/power/status エンドポイント
+│   │   ├── config.py              # 設定管理
+│   │   └── utils.py               # ヘルパー関数
 │   ├── tests/
 │   │   ├── unit/
 │   │   │   ├── test_power_manager.py
@@ -114,19 +132,6 @@ power-on/                          # リポジトリルート
 │   │   │   └── test_shutdown_command.py
 │   │   └── contract/
 │   │       └── test_api_contract.py
-│   ├── setup.py
-│   └── requirements.txt
-│
-├── android-client/                # Android クライアント（ライブラリ + CLI）
-│   ├── src/
-│   │   ├── power_client.py        # リモート制御クライアントライブラリ
-│   │   ├── cli.py                 # CLI インターフェース（デバッグ用）
-│   │   └── config.py              # 設定管理
-│   ├── tests/
-│   │   ├── unit/
-│   │   │   └── test_power_client.py
-│   │   └── integration/
-│   │       └── test_end_to_end.py
 │   ├── setup.py
 │   └── requirements.txt
 │
@@ -142,10 +147,11 @@ power-on/                          # リポジトリルート
 ```
 
 **構造の決定理由**:
-- 3つの独立したコンポーネントを separate directories として実装
+- 2つの独立したコンポーネント（Raspberry Pi、PC）を separate directories として実装
+- Raspberry Pi: Flask + Web UI フロントエンド（HTML/CSS/JS）+ バックエンド API を統合ホスト
+- PC: Flask API サーバー（Raspberry Pi からのリクエスト受信用）
 - 各コンポーネントは Library-First 原則に従い、自立したパッケージ構成
-- 共有コード（スキーマ、ヘルパー）は後段で `shared/` または individual requirements.txt でピンされた共通ライブラリとして管理
-- CLI インターフェース: 各ライブラリの `cli.py` で実装、`setup.py` のエントリーポイントで公開
+- Web UI アクセス: ユーザーは任意のデバイス（Android、PC、タブレット等）のブラウザで Raspberry Pi にアクセス
 
 ## 複雑性トラッキング
 
@@ -193,36 +199,39 @@ power-on/                          # リポジトリルート
 
 ### 2. インターフェースコントラクト
 
-3つのコンポーネントが公開するコントラクト：
+2つのコンポーネントが公開するコントラクト：
 
-**Raspberry Pi WOL サービス**:
-- **エンドポイント**: POST `/api/power/on`
-- **リクエスト**: `{"target_mac": "xx:xx:xx:xx:xx:xx"}`
-- **レスポンス**: `{"status": "packet_sent", "timestamp": "ISO8601"}`
+**Raspberry Pi Web UI + API**:
+- **Web UI**: `GET http://rpi-address:5000/` → HTML ページ返却
+  - ユーザーはブラウザでこのページにアクセス
+- **バックエンド API エンドポイント 1**: POST `/api/power/on`
+  - **リクエスト**: `{"target_mac": "xx:xx:xx:xx:xx:xx"}`
+  - **レスポンス**: `{"status": "packet_sent", "timestamp": "ISO8601"}`
+- **バックエンド API エンドポイント 2**: POST `/api/power/shutdown`
+  - **リクエスト**: `{"pc_address": "xxx.xxx.xxx.xxx", "timeout": 60}`
+  - **レスポンス**: `{"status": "shutdown_initiated", "timestamp": "ISO8601"}`
+- **バックエンド API エンドポイント 3**: GET `/api/status`
+  - **レスポンス**: `{"status": "online/offline", "timestamp": "ISO8601"}`
 
-**PC パワーマネジャーサービス**:
+**PC パワーマネジャー API**:
 - **エンドポイント 1**: POST `/api/power/shutdown`
   - **リクエスト**: `{"timeout": 60}`
   - **レスポンス**: `{"status": "shutdown_initiated", "timestamp": "ISO8601"}`
 - **エンドポイント 2**: GET `/api/power/status`
-  - **レスポンス**: `{"status": "online/offline", "uptime": "seconds"}`
+  - **レスポンス**: `{"status": "online", "timestamp": "ISO8601"}`
 
 **CLI インターフェース** (各コンポーネント):
 ```bash
-# RPi
+# RPi (開発/デバッグ用)
 $ power-on-rpi --help
   power-on-rpi send-wol --mac xx:xx:xx:xx:xx:xx
+  power-on-rpi run-server --port 5000
 
 # PC
 $ power-on-pc --help
   power-on-pc shutdown --timeout 60
   power-on-pc status
-
-# Android
-$ power-on-client --help
-  power-on-client power-on --rpi-address <ip>
-  power-on-client power-off --pc-address <ip>
-  power-on-client status --pc-address <ip>
+  power-on-pc run-server --port 5000
 ```
 
 **出力**: contracts/ ディレクトリ（次段階で生成）
