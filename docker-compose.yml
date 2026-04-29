@@ -1,0 +1,63 @@
+version: '3.8'
+
+# 開発・テスト用統合 Compose ファイル
+# 本番環境では以下を使用してください：
+#   Raspberry Pi: rpi-wol/docker-compose.yml
+#   PC:          pc-power/docker-compose.yml
+
+services:
+  # Raspberry Pi Web UI + WOL サービス
+  rpi-wol:
+    build:
+      context: ./rpi-wol
+      dockerfile: Dockerfile
+    container_name: power-on-rpi
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_HOST=0.0.0.0
+      - FLASK_PORT=5000
+      - PC_ADDRESS=pc-power
+      - PC_API_PORT=5001
+      - PC_API_TIMEOUT=5
+      - LOG_LEVEL=INFO
+      - WOL_TARGET_MAC=${WOL_TARGET_MAC:-aa:bb:cc:dd:ee:ff}
+      - WOL_BROADCAST_IP=${WOL_BROADCAST_IP:-255.255.255.255}
+    networks:
+      - power-on-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  # PC 電源管理サービス
+  pc-power:
+    build:
+      context: ./pc-power
+      dockerfile: Dockerfile
+    container_name: power-on-pc
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_HOST=0.0.0.0
+      - FLASK_PORT=5001
+      - SHUTDOWN_TIMEOUT=60
+      - LOG_LEVEL=INFO
+    networks:
+      - power-on-network
+    restart: unless-stopped
+    # PC container では実際のシャットダウンは実行しないか、--privileged フラグが必要
+    # privileged: true  # コンテナから host をシャットダウンする場合は有効化
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/api/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+networks:
+  power-on-network:
+    driver: bridge

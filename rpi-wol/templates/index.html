@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC 電源制御 - Power On</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>PC 電源制御パネル</h1>
+            <p class="subtitle">Raspberry Pi からのリモート制御</p>
+        </header>
+
+        <main>
+            <!-- ステータスセクション -->
+            <section class="status-section">
+                <h2>PC 状態</h2>
+                <div class="status-display">
+                    <div class="status-indicator" id="statusIndicator">
+                        <span class="status-icon offline"></span>
+                        <span class="status-text" id="statusText">オフライン</span>
+                    </div>
+                    <div class="status-timestamp" id="statusTimestamp">---</div>
+                </div>
+            </section>
+
+            <!-- 制御セクション -->
+            <section class="control-section">
+                <h2>電源制御</h2>
+                <div class="button-group">
+                    <button id="powerOnBtn" class="btn btn-primary" data-action="power-on">
+                        <span class="btn-icon">⚡</span>
+                        <span class="btn-text">電源 ON</span>
+                    </button>
+                    <button id="powerOffBtn" class="btn btn-secondary" data-action="power-off" disabled>
+                        <span class="btn-icon">🔴</span>
+                        <span class="btn-text">電源 OFF</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- ステータスメッセージ -->
+            <section class="message-section">
+                <div id="messageBox" class="message-box"></div>
+            </section>
+
+            <!-- ローディング表示 -->
+            <div id="loadingSpinner" class="loading-spinner hidden">
+                <div class="spinner"></div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Power On Control System v0.1.0</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

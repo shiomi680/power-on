@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  pc-power:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: power-on-pc
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_HOST=0.0.0.0
+      - FLASK_PORT=5001
+      - SHUTDOWN_TIMEOUT=${SHUTDOWN_TIMEOUT:-60}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    restart: unless-stopped
+    # host のシャットダウンを実行する場合は以下を有効化
+    # privileged: true
+    # pid: "host"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/api/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
