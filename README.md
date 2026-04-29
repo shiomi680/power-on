@@ -7,7 +7,9 @@ Raspberry Pi から PC の電源状態を制御する Wake-on-LAN（WOL）・電
 
 ## 目次
 
-- [クイックスタート（5 分）](#クイックスタート)
+- [クイックスタート（5 分）](#クイックスタート---ghcrioプリビルトイメージデプロイ)
+- [本番環境でのバージョン・ピン指定](#本番環境でのバージョンピン指定)
+- [開発・カスタマイズ（ローカル・ビルド）](#開発カスタマイズローカルビルド)
 - [前提条件](#前提条件)
 - [アーキテクチャ概要](#アーキテクチャ概要)
 - [デプロイメントガイド](#デプロイメントガイド)
@@ -20,31 +22,205 @@ Raspberry Pi から PC の電源状態を制御する Wake-on-LAN（WOL）・電
 
 ---
 
-## クイックスタート
+## クイックスタート - ghcr.io プリビルト・イメージ・デプロイ
 
-Docker Compose ワンコマンドで両サービスをデプロイ：
+**所要時間**: 5-10 分  
+**前提**: Docker v20.10+、git がインストール済み
+
+### ステップ 1: リポジトリをクローン
 
 ```bash
-# リポジトリのクローン
 git clone https://github.com/shiomi680/power-on.git
 cd power-on
-
-# 環境テンプレートをコピーして設定（環境変数セクション参照）
-# 基本テストの場合は docker-compose.yml のデフォルト値を使用可
-
-# 両サービスを起動
-docker compose up -d
-
-# サービスが実行中か確認
-curl http://localhost:5000/health     # Raspberry Pi WOL サービス
-curl http://localhost:5001/health     # PC 電源制御 API
 ```
 
 **期待される出力**:
-- Raspberry Pi Web UI: http://localhost:5000（動作中）
-- PC API ヘルスチェック: `{"status": "ok"}` を返す（ポート 5001）
+```
+Cloning into 'power-on'...
+remote: Enumerating objects: 150, done.
+...
+```
 
-両サービスは 2 分以内に起動します。
+**確認**:
+```bash
+ls -la
+# README.md, docker-compose.yml, rpi-wol/, pc-power/, .github/ が存在
+```
+
+### ステップ 2: 環境変数を設定
+
+```bash
+cp .env.example .env
+
+# 環境に応じて編集
+nano .env
+```
+
+**必須変数**（.env 内に編集）:
+- `PC_ADDRESS`: 対象 PC の IP アドレス（例: 192.168.1.100）
+- `WOL_TARGET_MAC`: 対象 PC の MAC アドレス（例: aa:bb:cc:dd:ee:ff）
+
+### ステップ 3: Docker Compose で起動
+
+```bash
+docker compose up -d
+
+# コンテナ状態を確認
+docker compose ps
+```
+
+**期待される出力**:
+```
+NAME              COMMAND              SERVICE      STATUS
+power-on-rpi      python -m ...        rpi-wol      Up
+power-on-pc       python -m ...        pc-power     Up
+```
+
+### ステップ 4: ヘルスチェック（2 分以内に応答）
+
+```bash
+curl http://localhost:5000/api/health
+curl http://localhost:5001/api/health
+```
+
+**期待される応答**: HTTP 200 OK
+
+### 検証チェックリスト（テスト仕様）
+
+- [ ] git clone が成功し、README.md、docker-compose.yml、rpi-wol/、pc-power/ が存在
+- [ ] .env ファイルが作成・編集可能
+- [ ] docker compose ps で両コンテナが Running 状態
+- [ ] curl http://localhost:5000/api/health が 200 OK を返す
+- [ ] curl http://localhost:5001/api/health が 200 OK を返す
+- [ ] 2 分以内に起動完了
+
+---
+
+## 本番環境でのバージョン・ピン指定
+
+本番運用では、特定の検証済みイメージバージョンをピン指定して再現性を確保します。
+
+### ステップ 1: docker-compose.yml のバージョンを確認
+
+```bash
+grep "image:" docker-compose.yml
+```
+
+**期待される出力**:
+```
+image: ghcr.io/shiomi680/power-on-rpi:v1.0.0
+image: ghcr.io/shiomi680/power-on-pc:v1.0.0
+```
+
+### ステップ 2: バージョンを切り替える場合
+
+```bash
+# docker-compose.yml を編集してバージョンを変更
+# 例: v1.0.0 → v1.1.0
+
+# イメージを再取得して起動
+docker compose pull
+docker compose up -d
+```
+
+### ステップ 3: バージョン確認
+
+```bash
+docker compose ps
+docker inspect power-on-rpi | grep "Image:"
+docker inspect power-on-pc | grep "Image:"
+```
+
+### 本番環境検証チェックリスト
+
+- [ ] docker-compose.yml に具体的なバージョン・タグ（v1.0.0 等）が指定されている
+- [ ] docker compose pull が指定バージョンのイメージを取得
+- [ ] docker inspect でイメージバージョンが正しいことを確認
+- [ ] バージョン切り替え後、両コンテナが起動可能
+
+---
+
+## 開発・カスタマイズ（ローカル・ビルド）
+
+コード修正後、ローカルで独自イメージをビルド・テストします。
+
+### ステップ 1: ソースコードを確認
+
+```bash
+git clone https://github.com/shiomi680/power-on.git
+cd power-on
+```
+
+### ステップ 2: ローカル・ビルド用 docker-compose ファイルを作成
+
+```bash
+cat > docker-compose.local.yml << 'EOF'
+version: '3.8'
+
+services:
+  rpi-wol:
+    build:
+      context: ./rpi-wol
+      dockerfile: Dockerfile
+    container_name: power-on-rpi-dev
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_HOST=0.0.0.0
+      - FLASK_PORT=5000
+      - PC_ADDRESS=${PC_ADDRESS:-192.168.1.100}
+      - WOL_TARGET_MAC=${WOL_TARGET_MAC:-aa:bb:cc:dd:ee:ff}
+      - WOL_BROADCAST_IP=${WOL_BROADCAST_IP:-255.255.255.255}
+    restart: unless-stopped
+
+  pc-power:
+    build:
+      context: ./pc-power
+      dockerfile: Dockerfile
+    container_name: power-on-pc-dev
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_HOST=0.0.0.0
+      - FLASK_PORT=5001
+      - SHUTDOWN_TIMEOUT=60
+    restart: unless-stopped
+EOF
+```
+
+### ステップ 3: .env を設定
+
+```bash
+cp .env.example .env
+nano .env  # 必要に応じて編集
+```
+
+### ステップ 4: ローカル・ビルド + 起動
+
+```bash
+# docker-compose.local.yml でビルド・起動
+docker compose -f docker-compose.local.yml up -d --build
+
+# または個別にビルド
+docker build -t power-on-rpi:dev ./rpi-wol
+docker build -t power-on-pc:dev ./pc-power
+docker compose -f docker-compose.local.yml up -d
+```
+
+### ステップ 5: 確認
+
+```bash
+docker compose -f docker-compose.local.yml ps
+
+curl http://localhost:5000/api/health
+curl http://localhost:5001/api/health
+```
+
+### 開発環境検証チェックリスト
+
+- [ ] docker build コマンドが成功
+- [ ] docker-compose.local.yml でローカル・イメージが起動
+- [ ] curl ヘルスチェック が 200 OK を返す
 
 ---
 
