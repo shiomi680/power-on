@@ -20,8 +20,8 @@
 
 **目的**: プロジェクト初期化・基本構造確認
 
-- [ ] T001 プロジェクト構造確認: .env.example、docker-compose.yml、version.json、.github/workflows/ が存在
-- [ ] T002 既存 README.md を確認: 現在のクイックスタート・セクション・デプロイメント手順をレビュー
+- [x] T001 プロジェクト構造確認: .env.example、docker-compose.yml、version.json、.github/workflows/ が存在
+- [x] T002 既存 README.md を確認: 現在のクイックスタート・セクション・デプロイメント手順をレビュー
 
 ---
 
@@ -36,12 +36,12 @@
 
 ### ユーザーストーリー 1 - 実装
 
-- [ ] T003 [US1] README.md 更新: **クイックスタート（5分）** セクションを追加 - git clone → .env.example コピー → .env 編集 → docker compose up フロー
-- [ ] T004 [US1] README.md 更新: docker-compose.yml での ghcr.io イメージ参照例・docker pull コマンド説明を追加
-- [ ] T005 [US1] docker-compose.yml 確認: raspi-wol サービスが `ghcr.io/shiomi680/power-on-rpi:v1.0.0` を参照していることを確認
-- [ ] T006 [US1] docker-compose.yml 確認: pc-power サービスが `ghcr.io/shiomi680/power-on-pc:v1.0.0` を参照していることを確認
-- [ ] T007 [US1] README.md 追加: ヘルスチェック・エンドポイント確認コマンド - `curl http://localhost:5000/api/health`、`curl http://localhost:5001/api/health`
-- [ ] T008 [US1] テスト実行: docker compose up → 両サービス起動確認 → ヘルスチェック確認（US1 受け入れシナリオ検証）
+- [x] T003 [US1] README.md 更新: **クイックスタート（5分）** セクションを追加 - git clone → .env.example コピー → .env 編集 → docker compose up フロー
+- [x] T004 [US1] README.md 更新: docker-compose.yml での ghcr.io イメージ参照例・docker pull コマンド説明を追加
+- [x] T005 [US1] docker-compose.yml 確認: raspi-wol サービスが `ghcr.io/shiomi680/power-on-rpi:v1.0.0` を参照していることを確認
+- [x] T006 [US1] docker-compose.yml 確認: pc-power サービスが `ghcr.io/shiomi680/power-on-pc:v1.0.0` を参照していることを確認
+- [x] T007 [US1] README.md 追加: ヘルスチェック・エンドポイント確認コマンド - `curl http://localhost:5000/api/health`、`curl http://localhost:5001/api/health`
+- [x] T008 [US1] テスト実行: docker compose up → 両サービス起動確認 → ヘルスチェック確認（US1 受け入れシナリオ検証）
 
 ---
 
@@ -56,10 +56,10 @@
 
 ### ユーザーストーリー 2 - 実装
 
-- [ ] T009 [US2] docker-compose.yml 確認: イメージ・タグが明確に v1.0.0 指定（または .env から動的参照確認）
-- [ ] T010 [US2] README.md 追加: **本番環境でのバージョン・ピン指定** セクション - バージョン・タグ切り替え方法（docker-compose.yml 直接編集またはシェル変数例）
-- [ ] T011 [US2] README.md 追加: version.json 役割説明・バージョン確認方法 (`cat version.json`)
-- [ ] T012 [US2] テスト実行: docker-compose.yml タグを v1.0.0 → v1.1.0（架空）に変更して docker compose up が新バージョンを引く動作確認
+- [x] T009 [US2] docker-compose.yml 確認: イメージ・タグが明確に v1.0.0 指定（または .env から動的参照確認）
+- [x] T010 [US2] README.md 追加: **本番環境でのバージョン・ピン指定** セクション - バージョン・タグ切り替え方法（docker-compose.yml 直接編集またはシェル変数例）
+- [x] T011 [US2] README.md 追加: version.json 役割説明・バージョン確認方法 (`cat version.json`)
+- [x] T012 [US2] テスト実行: docker-compose.yml タグを v1.0.0 → v1.1.0（架空）に変更して docker compose up が新バージョンを引く動作確認
 
 ---
 
@@ -74,12 +74,12 @@
 
 ### ユーザーストーリー 3 - 実装
 
-- [ ] T013 [P] [US3] docker-compose.local.yml を作成（ルート）: rpi-wol・pc-power の `build: { context: ./rpi-wol, dockerfile: Dockerfile }`・`build: { context: ./pc-power, dockerfile: Dockerfile }` オプション指定
-- [ ] T014 [P] [US3] rpi-wol/docker-compose.local.yml を作成: raspi 単体ローカル・ビルド・パターン - `image: power-on-rpi:local`、`build: { context: ., dockerfile: Dockerfile }`
-- [ ] T015 [P] [US3] pc-power/docker-compose.local.yml を作成: pc 単体ローカル・ビルド・パターン - `image: power-on-pc:local`、`build: { context: ., dockerfile: Dockerfile }`
-- [ ] T016 [US3] README.md 追加: **開発・カスタマイズ（ローカル・ビルド）** セクション - docker-compose.local.yml 使用方法・`docker compose -f docker-compose.local.yml up -d` コマンド例
-- [ ] T017 [US3] README.md 追加: Dockerfile 修正例・docker build コマンド（`docker build -t power-on-rpi:local ./rpi-wol`）・docker compose.local.yml で起動方法
-- [ ] T018 [US3] テスト実行: docker-compose.local.yml で docker compose up が実行可能であることを確認（US3 受け入れシナリオ検証）
+- [x] T013 [P] [US3] docker-compose.local.yml を作成（ルート）: rpi-wol・pc-power の `build: { context: ./rpi-wol, dockerfile: Dockerfile }`・`build: { context: ./pc-power, dockerfile: Dockerfile }` オプション指定
+- [x] T014 [P] [US3] rpi-wol/docker-compose.local.yml を作成: raspi 単体ローカル・ビルド・パターン - `image: power-on-rpi:local`、`build: { context: ., dockerfile: Dockerfile }`
+- [x] T015 [P] [US3] pc-power/docker-compose.local.yml を作成: pc 単体ローカル・ビルド・パターン - `image: power-on-pc:local`、`build: { context: ., dockerfile: Dockerfile }`
+- [x] T016 [US3] README.md 追加: **開発・カスタマイズ（ローカル・ビルド）** セクション - docker-compose.local.yml 使用方法・`docker compose -f docker-compose.local.yml up -d` コマンド例
+- [x] T017 [US3] README.md 追加: Dockerfile 修正例・docker build コマンド（`docker build -t power-on-rpi:local ./rpi-wol`）・docker compose.local.yml で起動方法
+- [x] T018 [US3] テスト実行: docker-compose.local.yml で docker compose up が実行可能であることを確認（US3 受け入れシナリオ検証）
 
 ---
 
@@ -89,22 +89,22 @@
 
 ### ポーランド・タスク
 
-- [ ] T019 README.md 更新: **想定構成・アーキテクチャ** セクションを追加
+- [x] T019 README.md 更新: **想定構成・アーキテクチャ** セクションを追加
   - システム・コンポーネント説明: raspi-wol（WOL マジックパケット送信）、pc-power（電源制御 API）、PC（対象マシン）
   - 通信フロー: Raspberry Pi → PC_ADDRESS（ネットワーク経由）→ PC（WOL/シャットダウン）
   - ネットワーク構成例: `192.168.1.x` 範囲での Raspberry Pi・PC 配置
 
-- [ ] T020 [P] rpi-wol/docker-compose.yml を作成（新規）: raspi 独立構成
+- [x] T020 [P] rpi-wol/docker-compose.yml を作成（新規）: raspi 独立構成
   - イメージ: `ghcr.io/shiomi680/power-on-rpi:v1.0.0`
   - ポート: 5000
   - 環境変数: `PC_ADDRESS`、`WOL_TARGET_MAC`、`WOL_BROADCAST_IP`
 
-- [ ] T021 [P] pc-power/docker-compose.yml を作成（新規）: pc 独立構成
+- [x] T021 [P] pc-power/docker-compose.yml を作成（新規）: pc 独立構成
   - イメージ: `ghcr.io/shiomi680/power-on-pc:v1.0.0`
   - ポート: 5001
   - 環境変数: `SHUTDOWN_TIMEOUT`
 
-- [ ] T022 README.md セクション再構成・統合:
+- [x] T022 README.md セクション再構成・統合:
   - 目次更新
   - **クイックスタート（5分）** - 両サービス統合デプロイ
   - **想定構成・アーキテクチャ** - システム概要（T019 で作成）
@@ -114,7 +114,7 @@
   - **トラブルシューティング** - 既存セクション保持
   - **参考資料** - DOCKER.md、CI-CD.md リンク
 
-- [ ] T023 README.md 最終確認: すべてのコマンド例・ファイルパス・構成が正確・完全であることを検証
+- [x] T023 README.md 最終確認: すべてのコマンド例・ファイルパス・構成が正確・完全であることを検証
 
 ---
 

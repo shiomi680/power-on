@@ -1,0 +1,62 @@
+version: '3.8'
+
+# ローカル・ビルド・パターン
+# 開発時に Dockerfile を修正して、ローカル・イメージをビルド・実行する場合に使用
+# 使用方法: docker compose -f docker-compose.local.yml up -d
+
+services:
+  # Raspberry Pi Web UI + WOL サービス（ローカル・ビルド）
+  rpi-wol:
+    build:
+      context: ./rpi-wol
+      dockerfile: Dockerfile
+    image: power-on-rpi:local
+    container_name: power-on-rpi
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_HOST=0.0.0.0
+      - FLASK_PORT=5000
+      - PC_ADDRESS=pc-power
+      - PC_API_PORT=5001
+      - PC_API_TIMEOUT=5
+      - LOG_LEVEL=INFO
+      - WOL_TARGET_MAC=${WOL_TARGET_MAC:-aa:bb:cc:dd:ee:ff}
+      - WOL_BROADCAST_IP=${WOL_BROADCAST_IP:-255.255.255.255}
+    networks:
+      - power-on-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  # PC 電源管理サービス（ローカル・ビルド）
+  pc-power:
+    build:
+      context: ./pc-power
+      dockerfile: Dockerfile
+    image: power-on-pc:local
+    container_name: power-on-pc
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_HOST=0.0.0.0
+      - FLASK_PORT=5001
+      - SHUTDOWN_TIMEOUT=60
+      - LOG_LEVEL=INFO
+    networks:
+      - power-on-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/api/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+networks:
+  power-on-network:
+    driver: bridge
