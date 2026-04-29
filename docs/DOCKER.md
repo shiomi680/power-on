@@ -36,7 +36,7 @@ Docker を使用して Power On システムをデプロイします。
 ### 1. イメージのビルド
 
 ```bash
-docker-compose build
+docker compose build
 ```
 
 または個別にビルド:
@@ -52,7 +52,7 @@ docker build -t power-on-pc:latest ./pc-power
 ### 2. コンテナの起動
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ### 3. アクセス確認
@@ -85,7 +85,7 @@ LOG_LEVEL=INFO
 EOF
 
 # 起動
-docker-compose up -d
+docker compose up -d
 ```
 
 ### Raspberry Pi コンテナの環境変数
@@ -116,36 +116,36 @@ docker-compose up -d
 
 ```bash
 # すべてのログ
-docker-compose logs -f
+docker compose logs -f
 
 # 特定サービスのログ
-docker-compose logs -f rpi-wol
-docker-compose logs -f pc-power
+docker compose logs -f rpi-wol
+docker compose logs -f pc-power
 ```
 
 ### コンテナの停止
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ### コンテナの再起動
 
 ```bash
-docker-compose restart
+docker compose restart
 ```
 
 ### コンテナの再構築
 
 ```bash
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 ## ネットワーク設定
 
 ### Docker Compose での通信
 
-docker-compose 内のコンテナ間通信は自動的に設定されます:
+docker compose 内のコンテナ間通信は自動的に設定されます:
 
 - `rpi-wol` → `pc-power` は hostname `pc-power` でアクセス可能
 - PC_ADDRESS を `pc-power` に設定（デフォルト）
@@ -155,7 +155,7 @@ docker-compose 内のコンテナ間通信は自動的に設定されます:
 Raspberry Pi コンテナのポート 5000 を外部に公開:
 
 ```yaml
-# docker-compose.yml の rpi-wol セクション
+# docker compose.yml の rpi-wol セクション
 ports:
   - "0.0.0.0:5000:5000"  # すべてのインターフェースで受信
   # または
@@ -168,8 +168,8 @@ ports:
 
 ```bash
 # ログを確認
-docker-compose logs rpi-wol
-docker-compose logs pc-power
+docker compose logs rpi-wol
+docker compose logs pc-power
 
 # ポートが既に使用されていないか確認
 lsof -i :5000
@@ -198,7 +198,7 @@ docker exec power-on-rpi python -m cli send-wol --mac aa:bb:cc:dd:ee:ff
 ### セキュリティ設定
 
 ```yaml
-# docker-compose.yml
+# docker compose.yml
 services:
   rpi-wol:
     ports:
@@ -237,7 +237,7 @@ services:
 
 ## Raspberry Pi 実機へのデプロイ
 
-### オプション 1: docker-compose で実行
+### オプション 1: docker compose で実行
 
 ```bash
 # Raspberry Pi にログイン
@@ -248,7 +248,7 @@ git clone https://github.com/user/power-on.git
 cd power-on
 
 # 起動
-docker-compose up -d
+docker compose up -d
 ```
 
 ### オプション 2: Pre-built イメージを使用
