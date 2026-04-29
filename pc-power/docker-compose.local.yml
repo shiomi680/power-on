@@ -1,13 +1,15 @@
 version: '3.8'
 
-# PC 電源管理サービス - スタンドアロン構成
-# PC に単独でデプロイする場合に使用
-# 使用方法: cd pc-power && docker compose up -d
+# PC 電源管理サービス - ローカル・ビルド・パターン
+# 開発時に Dockerfile を修正して、ローカル・イメージをビルド・実行する場合に使用
+# 使用方法: cd pc-power && docker compose -f docker-compose.local.yml up -d
 
 services:
   pc-power:
-    image: ghcr.io/shiomi680/power-on-pc:v1.0.0
-    # ローカル・ビルド・オーバーライド: docker compose -f docker-compose.local.yml up -d
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: power-on-pc:local
     container_name: power-on-pc
     ports:
       - "5001:5001"
@@ -17,9 +19,6 @@ services:
       - SHUTDOWN_TIMEOUT=${SHUTDOWN_TIMEOUT:-60}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
     restart: unless-stopped
-    # host のシャットダウンを実行する場合は以下を有効化
-    # privileged: true
-    # pid: "host"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5001/api/health"]
       interval: 30s

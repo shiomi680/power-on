@@ -1,13 +1,15 @@
 version: '3.8'
 
-# Raspberry Pi WOL サービス - スタンドアロン構成
-# Raspberry Pi に単独でデプロイする場合に使用
-# 使用方法: cd rpi-wol && cp ../.env.example .env && docker compose up -d
+# Raspberry Pi WOL サービス - ローカル・ビルド・パターン
+# 開発時に Dockerfile を修正して、ローカル・イメージをビルド・実行する場合に使用
+# 使用方法: cd rpi-wol && docker compose -f docker-compose.local.yml up -d
 
 services:
   rpi-wol:
-    image: ghcr.io/shiomi680/power-on-rpi:v1.0.0
-    # ローカル・ビルド・オーバーライド: docker compose -f docker-compose.local.yml up -d
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: power-on-rpi:local
     container_name: power-on-rpi
     ports:
       - "5000:5000"
@@ -15,11 +17,9 @@ services:
       - FLASK_HOST=0.0.0.0
       - FLASK_PORT=5000
       - PC_ADDRESS=${PC_ADDRESS:-192.168.1.100}
-      - PC_API_PORT=5001
-      - PC_API_TIMEOUT=5
-      - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - WOL_TARGET_MAC=${WOL_TARGET_MAC:-aa:bb:cc:dd:ee:ff}
       - WOL_BROADCAST_IP=${WOL_BROADCAST_IP:-255.255.255.255}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
