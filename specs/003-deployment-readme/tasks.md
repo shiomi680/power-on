@@ -1,255 +1,254 @@
-# Implementation Tasks: Deployment README Documentation
+# 実装タスク: デプロイ手順 README ドキュメント
 
-**Feature**: Deployment README Documentation  
-**Branch**: `003-deployment-readme`  
-**Total Tasks**: 28  
-**Execution Strategy**: MVP scope (US1 + US2 + US3 = core deployment guides), then add US4 (troubleshooting) for full feature
+**機能**: デプロイ手順 README ドキュメント  
+**ブランチ**: `003-deployment-readme`  
+**総タスク数**: 34  
+**実装戦略**: MVP スコープ（US1 + US2 + US3 = コア・デプロイメント・ガイド）、その後 US4（トラブルシューティング）を追加して機能完成
 
 ---
 
-## Dependencies & Execution Order
+## 依存関係・実行順序
 
-### Story Dependencies
+### ストーリー依存関係
 
 ```
-US1 (Raspberry Pi) [P1] ─┐
-US2 (PC) [P1]         ├─→ (Independent, can run in parallel)
-US3 (Docker) [P1]     ─┘
+US1（Raspberry Pi） [P1] ─┐
+US2（PC）         [P1] ├─→ （独立、並列実行可）
+US3（Docker）     [P1] ─┘
                         ↓
-US4 (Troubleshooting) [P2] (Depends on other 3 for reference commands)
+US4（トラブルシューティング） [P2] （他の 3 つの完了に依存、参考コマンド）
 ```
 
-### Parallel Execution
+### 並列実行
 
-- **Phase 2 (Foundational)**: All tasks can run in parallel [P]
-- **Phase 3 (US1)**: T009-T012 independent, can parallelize [P]
-- **Phase 4 (US2)**: T013-T016 independent, can parallelize [P]
-- **Phase 5 (US3)**: T017-T020 independent, can parallelize [P]
-- **Phase 6 (US4)**: Depends on completion of US1-US3, tasks T021-T027 can parallelize [P]
-
----
-
-## Phase 1: Setup
-
-### Goal
-Initialize documentation structure and environment.
-
-### Independent Test Criteria
-- README.md exists in repository root
-- Spec and plan documents complete and accessible
-- Documentation structure created per plan.md
-
-### Tasks
-
-- [x] T001 Create README.md with table of contents stub in repository root
-- [x] T002 Create .docs/examples/ directory for command examples and test scenarios
-- [x] T003 Create architecture ASCII diagram template in docs/ARCHITECTURE.md
-- [x] T004 Verify existing documentation files (DOCKER.md, DEPLOYMENT.md, CI-CD.md) are intact
+- **フェーズ 2（基盤）**: すべてのタスク並列実行可能 [P]
+- **フェーズ 3（US1）**: T009-T012 独立、並列化可能 [P]
+- **フェーズ 4（US2）**: T013-T016 独立、並列化可能 [P]
+- **フェーズ 5（US3）**: T017-T020 独立、並列化可能 [P]
+- **フェーズ 6（US4）**: US1-US3 完了後、タスク T021-T027 並列化可能 [P]
 
 ---
 
-## Phase 2: Foundational (Blocking Prerequisites)
+## フェーズ 1: セットアップ
 
-### Goal
-Prepare shared content and validate existing information.
+### 目標
+ドキュメント構造と環境を初期化。
 
-### Independent Test Criteria
-- Header/introduction section complete
-- Architecture overview documented
-- Environment variables documented with explanations
+### 独立テスト基準
+- README.md がリポジトリルートに存在
+- 仕様と計画ドキュメント完了・アクセス可能
+- 計画書に従いドキュメント構造を作成
 
-### Tasks
+### タスク
 
-- [x] T005 [P] Write README header and project description (overview, key features) in README.md lines 1-20
-- [x] T006 [P] Write Prerequisites section (Docker v20.10+, Python 3.10+, git) in README.md
-- [x] T007 [P] Create Environment Variables reference table in README.md with all vars from .env.example files
-- [x] T008 [P] Write Architecture Overview section with ASCII diagram in README.md
+- [x] T001 リポジトリルートに目次スタブ付き README.md を作成
+- [x] T002 コマンド例・テストシナリオ用 .docs/examples/ ディレクトリを作成
+- [x] T003 docs/ARCHITECTURE.md にアーキテクチャ ASCII 図テンプレートを作成
+- [x] T004 既存ドキュメント（DOCKER.md、DEPLOYMENT.md、CI-CD.md）が無傷か確認
 
 ---
 
-## Phase 3: User Story 1 - Raspberry Pi Deployment Guide [P1]
+## フェーズ 2: 基盤（ブロッキング前提条件）
 
-### Story Goal
+### 目標
+共有コンテンツを準備し、既存情報を検証。
+
+### 独立テスト基準
+- ヘッダー/導入セクション完了
+- アーキテクチャ概要がドキュメント化
+- 環境変数がリスト・説明付きでドキュメント化
+
+### タスク
+
+- [x] T005 [P] README.md の 1～20 行に README ヘッダーと機能説明を記述
+- [x] T006 [P] README.md に前提条件セクション（Docker v20.10+、Python 3.10+、git）を記述
+- [x] T007 [P] README.md に .env.example ファイルの全変数を含む環境変数リファレンス・テーブルを作成
+- [x] T008 [P] README.md にアーキテクチャ概要セクションと ASCII 図を記述
+
+---
+
+## フェーズ 3: ユーザーストーリー 1 - Raspberry Pi デプロイメント・ガイド [P1]
+
+### ストーリー目標
 Raspberry Pi で Power-On WOL サービスをデプロイしたい開発者・運用者が、README から完全なセットアップ手順を確認できるようにする。
 
-### Acceptance Criteria (from spec.md)
+### 受け入れ基準（仕様書より）
 1. README の「Raspberry Pi デプロイ」セクションを読んで、step-by-step でセットアップできる手順が明確に記載されている
-2. 初心者ユーザーが README の手順に従って 10分以内に WOL サービスが起動できる
+2. 初心者ユーザーが README の手順に従って 10 分以内に WOL サービスが起動できる
 3. セットアップ完了後、Web UI にアクセス、ポート 5000 で正常に動作している
 
-### Independent Test Criteria
-- Raspberry Pi deployment section present and complete
-- All commands are copy-pasteable and tested
-- Expected output for each step documented
-- Health check endpoint documented
+### 独立テスト基準
+- Raspberry Pi デプロイメント・セクション存在・完了
+- すべてのコマンドがコピペ可能・テスト済み
+- 各ステップの期待される出力をドキュメント化
+- ヘルスチェック・エンドポイントをドキュメント化
 
-### Tasks
+### タスク
 
-- [x] T009 [P] [US1] Write Raspberry Pi deployment section header and prerequisites in README.md
-- [x] T010 [P] [US1] Document git clone and directory structure setup steps in README.md
-- [x] T011 [P] [US1] Document .env file configuration with PC_ADDRESS, WOL_TARGET_MAC, port settings in README.md
-- [x] T012 [P] [US1] Document docker compose up and health check validation steps in README.md
+- [x] T009 [P] [US1] README.md に Raspberry Pi デプロイ・セクション・ヘッダーと前提条件を記述
+- [x] T010 [P] [US1] README.md に git clone とディレクトリ構造セットアップ・ステップをドキュメント化
+- [x] T011 [P] [US1] README.md に .env ファイル設定（PC_ADDRESS、WOL_TARGET_MAC、ポート設定）をドキュメント化
+- [x] T012 [P] [US1] README.md に docker compose up とヘルスチェック検証ステップをドキュメント化
 
 ---
 
-## Phase 4: User Story 2 - PC Deployment Guide [P1]
+## フェーズ 4: ユーザーストーリー 2 - PC デプロイメント・ガイド [P1]
 
-### Story Goal
+### ストーリー目標
 Windows/Linux PC で Power-On 電源管理 API をデプロイしたい開発者が、README からセットアップ手順を確認できるようにする。
 
-### Acceptance Criteria (from spec.md)
+### 受け入れ基準（仕様書より）
 1. README の「PC デプロイ」セクションを読んで、step-by-step でセットアップできる手順が明確に記載されている
-2. 初心者ユーザーが README の手順に従って 5分以内に API サーバーが起動できる
+2. 初心者ユーザーが README の手順に従って 5 分以内に API サーバーが起動できる
 3. セットアップ完了後、API の health check endpoint にアクセス、正常に応答している
 
-### Independent Test Criteria
-- PC deployment section present and complete
-- Platform-specific variations noted (Linux, macOS, Windows)
-- All commands tested and working
-- Health check validation steps clear
+### 独立テスト基準
+- PC デプロイメント・セクション存在・完了
+- プラットフォーム固有の変更（Linux、macOS、Windows）を注記
+- すべてのコマンドがテスト済み・動作中
+- ヘルスチェック検証ステップが明確
 
-### Tasks
+### タスク
 
-- [x] T013 [P] [US2] Write PC deployment section header and prerequisites in README.md
-- [x] T014 [P] [US2] Document git clone and repository setup for PC component in README.md
-- [x] T015 [P] [US2] Document .env file configuration with port, shutdown timeout, host settings in README.md
-- [x] T016 [P] [US2] Document docker compose up and health check validation for PC API in README.md
+- [x] T013 [P] [US2] README.md に PC デプロイ・セクション・ヘッダーと前提条件を記述
+- [x] T014 [P] [US2] README.md に PC コンポーネント用の git clone とリポジトリセットアップをドキュメント化
+- [x] T015 [P] [US2] README.md に .env ファイル設定（ポート、シャットダウン・タイムアウト、ホスト設定）をドキュメント化
+- [x] T016 [P] [US2] README.md に PC API 用の docker compose up とヘルスチェック検証をドキュメント化
 
 ---
 
-## Phase 5: User Story 3 - Docker Deployment Option [P1]
+## フェーズ 5: ユーザーストーリー 3 - Docker デプロイメント・オプション [P1]
 
-### Story Goal
+### ストーリー目標
 Docker を使った簡単デプロイを希望するユーザーが、README からコンテナ化デプロイの手順を確認できるようにする。
 
-### Acceptance Criteria (from spec.md)
+### 受け入れ基準（仕様書より）
 1. README の「Docker デプロイ」セクションを読んで、`docker compose up -d` で即座にデプロイできる手順が記載されている
-2. Docker インストール済み環境で Docker セクションの手順に従い、2分以内に両サービスが起動できる
+2. Docker インストール済み環境で Docker セクションの手順に従い、2 分以内に両サービスが起動できる
 
-### Independent Test Criteria
-- Docker quick-start section present (5 minutes or less)
-- Single docker compose command documented
-- Expected output shown
-- Both rpi-wol and pc-power services in compose file referenced
+### 独立テスト基準
+- Docker クイックスタート・セクション存在（5 分以内）
+- Docker Compose ワンコマンド・ドキュメント化
+- 期待される出力を表示
+- docker-compose.yml の rpi-wol と pc-power サービスを参照
 
-### Tasks
+### タスク
 
-- [x] T017 [P] [US3] Write Docker Quick Start section (single command deployment) in README.md
-- [x] T018 [P] [US3] Document docker compose up command with environment variable substitution in README.md
-- [x] T019 [P] [US3] Document how to access both services (Web UI on 5000, API on 5001) in README.md
-- [x] T020 [P] [US3] Write Docker service verification steps (curl health endpoints) in README.md
+- [x] T017 [P] [US3] README.md に Docker クイックスタート・セクション（ワンコマンド・デプロイ）を記述
+- [x] T018 [P] [US3] README.md に環境変数置換を含む docker compose up コマンドをドキュメント化
+- [x] T019 [P] [US3] README.md に両サービスへのアクセス方法（Web UI ポート 5000、API ポート 5001）をドキュメント化
+- [x] T020 [P] [US3] README.md に Docker サービス検証ステップ（curl ヘルスエンドポイント）を記述
 
 ---
 
-## Phase 6: User Story 4 - Troubleshooting Guide [P2]
+## フェーズ 6: ユーザーストーリー 4 - トラブルシューティング・ガイド [P2]
 
-### Story Goal
+### ストーリー目標
 デプロイ中に問題が発生したユーザーが、README のトラブルシューティング章で解決方法を見つけられるようにする。
 
-### Acceptance Criteria (from spec.md)
+### 受け入れ基準（仕様書より）
 1. README のトラブルシューティングセクションに、ポート競合、権限エラー、ネットワーク接続等の一般的な問題への対応が記載されている
 2. デプロイ中にエラー発生時、README のトラブルシューティングを確認して問題が解決できるか手がかりが得られる
 
-### Independent Test Criteria
-- Troubleshooting section covers 80% of common deployment failures
-- Each issue includes symptom, diagnosis, and solution
-- Cross-references to logs and health checks
-- Platform-specific gotchas documented
+### 独立テスト基準
+- トラブルシューティング・セクションが一般的デプロイメント失敗の 80% をカバー
+- 各問題に症状・診断・解決方法を含む
+- ログとヘルスチェックへの相互参照
+- プラットフォーム固有の落とし穴をドキュメント化
 
-### Tasks
+### タスク
 
-- [x] T021 [P] [US4] Write Troubleshooting section header and common issues overview in README.md
-- [x] T022 [P] [US4] Document port conflict diagnosis and resolution (5000/5001 already in use) in README.md
-- [x] T023 [P] [US4] Document permission error diagnosis and resolution (docker daemon, file ownership) in README.md
-- [x] T024 [P] [US4] Document network connectivity diagnosis (PC_ADDRESS unreachable, SSH keys) in README.md
-- [x] T025 [P] [US4] Document Docker-specific issues (image pull failures, disk space, daemon errors) in README.md
-- [x] T026 [P] [US4] Document health check endpoints and log inspection procedures in README.md
-- [x] T027 [P] [US4] Document performance issues and common gotchas (Raspberry Pi SD card, system load) in README.md
-
----
-
-## Phase 7: Polish & Cross-Cutting Concerns
-
-### Goal
-Add finishing touches, validate, and prepare for publication.
-
-### Tasks
-
-- [x] T028 Validate all command samples are executable and tested, update README.md with verified examples
-- [x] T029 Create .docs/examples/ folder with tested shell scripts for each deployment scenario
-- [x] T030 Verify README links to existing docs (DOCKER.md, DEPLOYMENT.md, CI-CD.md) are correct
-- [x] T031 Add Table of Contents with proper anchor links at top of README.md
-- [x] T032 Proofread README for clarity, consistency, and tone for non-technical users
-- [x] T033 Final validation: README satisfies all 10 functional requirements from spec.md
-- [x] T034 Final validation: README satisfies all 5 success criteria from spec.md
+- [x] T021 [P] [US4] README.md にトラブルシューティング・セクション・ヘッダーと一般的問題概要を記述
+- [x] T022 [P] [US4] README.md にポート競合の診断・解決（5000/5001 既に使用中）をドキュメント化
+- [x] T023 [P] [US4] README.md にパーミッションエラーの診断・解決（docker デーモン、ファイル所有権）をドキュメント化
+- [x] T024 [P] [US4] README.md にネットワーク接続の診断（PC_ADDRESS 到達不可、SSH キー）をドキュメント化
+- [x] T025 [P] [US4] README.md に Docker 固有の問題（イメージ取得失敗、ディスク容量、デーモン・エラー）をドキュメント化
+- [x] T026 [P] [US4] README.md にヘルスチェック・エンドポイントとログ検査手順をドキュメント化
+- [x] T027 [P] [US4] README.md にパフォーマンス問題と一般的な落とし穴（Raspberry Pi SD カード、システム負荷）をドキュメント化
 
 ---
 
-## Implementation Strategy
+## フェーズ 7: ポーランド・クロスカッティングな関心事
 
-### MVP Scope (Recommended First Iteration)
-**Tasks**: T001-T020 (~2 hours)
-- ✅ Phase 1: Setup
-- ✅ Phase 2: Foundational (shared content)
-- ✅ Phase 3: US1 (Raspberry Pi)
-- ✅ Phase 4: US2 (PC)
-- ✅ Phase 5: US3 (Docker)
+### 目標
+仕上げを追加し、検証を行い、公開準備を整える。
 
-**Result**: Beginners can deploy all three configurations with clear step-by-step guides.
+### タスク
 
-### Full Scope (Second Iteration)
-**Tasks**: T021-T034 (~1 hour)
-- ✅ Phase 6: US4 (Troubleshooting)
-- ✅ Phase 7: Polish & validation
-
-**Result**: Complete deployment documentation with comprehensive troubleshooting and examples.
+- [x] T028 すべてのコマンドサンプルが実行可能・テスト済みであることを確認、README.md で検証例を更新
+- [x] T029 各デプロイメント・シナリオ用のテスト済みシェル・スクリプトを .docs/examples/ フォルダに作成
+- [x] T030 既存ドキュメント（DOCKER.md、DEPLOYMENT.md、CI-CD.md）への README リンクが正しいことを確認
+- [x] T031 README.md の最上部に適切なアンカーリンク付き目次を追加
+- [x] T032 README を非技術ユーザー向けの明確性・一貫性・トーンについて校正
+- [x] T033 最終検証: README が仕様書の 10 個すべての機能要件を満たしているか確認
+- [x] T034 最終検証: README が仕様書の 5 個すべての成功基準を満たしているか確認
 
 ---
 
-## Summary
+## 実装戦略
 
-| Metric | Value |
-|--------|-------|
-| Total Tasks | 34 |
-| MVP Tasks | 20 |
-| Setup Phase | 4 tasks |
-| Foundational Phase | 4 tasks |
-| US1 (Raspberry Pi) [P1] | 4 tasks |
-| US2 (PC) [P1] | 4 tasks |
-| US3 (Docker) [P1] | 4 tasks |
-| US4 (Troubleshooting) [P2] | 7 tasks |
-| Polish Phase | 7 tasks |
-| Parallelizable Tasks | 25 (marked [P]) |
-| Independent Test Criteria | 4 (one per phase) |
-| Estimated Time (MVP) | 2-3 hours |
-| Estimated Time (Full) | 3-4 hours |
+### MVP スコープ（推奨・最初のイテレーション）
+**タスク**: T001-T020（約 2 時間）
+- ✅ フェーズ 1: セットアップ
+- ✅ フェーズ 2: 基盤（共有コンテンツ）
+- ✅ フェーズ 3: US1（Raspberry Pi）
+- ✅ フェーズ 4: US2（PC）
+- ✅ フェーズ 5: US3（Docker）
+
+**成果**: 3 つの設定すべてでデプロイでき、明確なステップバイステップ・ガイドを持つ初心者。
+
+### フル・スコープ（2 番目のイテレーション）
+**タスク**: T021-T034（約 1 時間）
+- ✅ フェーズ 6: US4（トラブルシューティング）
+- ✅ フェーズ 7: ポーランド・検証
+
+**成果**: 包括的なデプロイメント・ドキュメントと例。
 
 ---
 
-## Coverage Mapping to Requirements
+## サマリー
 
-### Functional Requirements → Tasks
+| 指標 | 値 |
+|------|-----|
+| 総タスク数 | 34 |
+| MVP タスク | 20 |
+| セットアップ・フェーズ | 4 タスク |
+| 基盤フェーズ | 4 タスク |
+| US1（Raspberry Pi） [P1] | 4 タスク |
+| US2（PC） [P1] | 4 タスク |
+| US3（Docker） [P1] | 4 タスク |
+| US4（トラブルシューティング） [P2] | 7 タスク |
+| ポーランド・フェーズ | 7 タスク |
+| 並列化可能なタスク | 25（[P] でマーク） |
+| 独立テスト基準 | 4（フェーズごと 1 つ） |
+| 推定時間（MVP） | 2～3 時間 |
+| 推定時間（フル） | 3～4 時間 |
 
-| Requirement | Task(s) | Coverage |
-|-------------|---------|----------|
-| FR-001: Raspberry Pi deployment guide | T009-T012 | ✅ |
-| FR-002: PC deployment guide | T013-T016 | ✅ |
-| FR-003: Docker deployment option | T017-T020 | ✅ |
-| FR-004: Prerequisites documentation | T006 | ✅ |
-| FR-005: Network configuration details | T007, T011, T015, T019 | ✅ |
-| FR-006: Troubleshooting section | T021-T027 | ✅ |
-| FR-007: Quick-start section | T017-T020, T028 | ✅ |
-| FR-008: Architecture diagram/text | T008, T003 | ✅ |
-| FR-009: Environment variables list | T007 | ✅ |
-| FR-010: Table of Contents | T031 | ✅ |
+---
 
-### Success Criteria → Validation
+## 要件へのカバレッジ・マッピング
 
-| Success Criterion | Validation Task | Expected Outcome |
-|------------------|-----------------|------------------|
-| SC-001: 15-min deploy for beginners | T028 + T032 | Commands tested, timing validated |
-| SC-002: 80% troubleshooting coverage | T021-T027 | 7 common issues documented |
-| SC-003: 5-min quick-start | T017-T020 | Single command, clear validation |
-| SC-004: Command samples executable | T028 + T029 | All examples tested in .docs/ |
-| SC-005: No additional questions needed | T032 + T033 | Comprehensive coverage confirmed |
+### 機能要件 → タスク
 
+| 要件 | タスク | カバレッジ |
+|------|--------|----------|
+| FR-001: Raspberry Pi デプロイ・ガイド | T009-T012 | ✅ |
+| FR-002: PC デプロイ・ガイド | T013-T016 | ✅ |
+| FR-003: Docker デプロイメント・オプション | T017-T020 | ✅ |
+| FR-004: 前提条件ドキュメント | T006 | ✅ |
+| FR-005: ネットワーク設定詳細 | T007、T011、T015、T019 | ✅ |
+| FR-006: トラブルシューティング・セクション | T021-T027 | ✅ |
+| FR-007: クイックスタート・セクション | T017-T020、T028 | ✅ |
+| FR-008: アーキテクチャ図/テキスト | T008、T003 | ✅ |
+| FR-009: 環境変数リスト | T007 | ✅ |
+| FR-010: 目次 | T031 | ✅ |
+
+### 成功基準 → 検証
+
+| 成功基準 | 検証タスク | 期待される成果 |
+|---------|-----------|-------------|
+| SC-001: 初心者向け 15 分デプロイ | T028 + T032 | コマンドがテスト済み、タイミング検証済み |
+| SC-002: トラブルシューティング 80% カバレッジ | T021-T027 | 7 つの一般的問題がドキュメント化 |
+| SC-003: 5 分クイックスタート | T017-T020 | ワンコマンド、明確な検証 |
+| SC-004: コマンドサンプル実行可能 | T028 + T029 | すべての例が .docs/ でテスト済み |
+| SC-005: 追加質問不要 | T032 + T033 | 包括的なカバレッジ確認 |

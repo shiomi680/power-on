@@ -1,198 +1,198 @@
-# Implementation Plan: Deployment README Documentation
+# 実装計画: デプロイ手順 README ドキュメント
 
-**Branch**: `003-deployment-readme` | **Date**: 2026-04-29 | **Spec**: [specs/003-deployment-readme/spec.md](spec.md)
-**Input**: Feature specification from `/specs/003-deployment-readme/spec.md`
+**ブランチ**: `003-deployment-readme` | **日付**: 2026-04-29 | **仕様書**: [specs/003-deployment-readme/spec.md](spec.md)
+**入力**: `/specs/003-deployment-readme/spec.md` の機能仕様
 
-**Note**: This template is filled in by the `/speckit-plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
+**注記**: このテンプレートは `/speckit-plan` コマンドで記入されます。実行ワークフローについては `.specify/templates/plan-template.md` を参照してください。
 
-## Summary
+## 概要
 
-README に Raspberry Pi、PC、Docker デプロイ手順を段階的に記載し、初心者ユーザーが 15 分以内でシステムをセットアップできる包括的なデプロイメントガイドを提供します。トラブルシューティング章を追加して、よくある問題への対応方法も明記します。技術的には、既存のドキュメント（DOCKER.md, DEPLOYMENT.md, CI-CD.md）と重複しない形で、快速スタートと段階的な詳細説明を両立させます。
+README に Raspberry Pi、PC、Docker デプロイ手順を段階的に記載し、初心者ユーザーが 15 分以内にシステムをセットアップできる包括的なデプロイメントガイドを提供します。トラブルシューティング章を追加して、よくある問題への対応方法も明記します。技術的には、既存のドキュメント（DOCKER.md、DEPLOYMENT.md、CI-CD.md）と重複しない形で、快速スタートと段階的な詳細説明を両立させます。
 
-## Technical Context
+## 技術コンテキスト
 
-**Language/Version**: Markdown documentation for GitHub  
-**Primary Dependencies**: N/A (documentation only, no code dependencies)  
-**Storage**: N/A  
-**Testing**: Content validation through command sample execution (SC-004 acceptance criteria)  
-**Target Platform**: GitHub repository (public documentation)  
-**Project Type**: Documentation/Deployment guides  
-**Performance Goals**: Beginners can deploy in 15 minutes (SC-001), quick-start in 5 minutes (SC-003)  
-**Constraints**: Clarity for non-technical users, complete command examples, no implementation-specific details  
-**Scale/Scope**: Single README.md file with major sections (TOC, quick-start, prerequisites, architecture, deployment guides, environment variables, troubleshooting)
+**言語/形式**: GitHub 用 Markdown ドキュメント  
+**主要依存関係**: なし（ドキュメントのみ、コード依存なし）  
+**ストレージ**: なし  
+**テスト**: コマンドサンプル実行による検証（SC-004 受け入れ基準）  
+**対象プラットフォーム**: GitHub リポジトリ（公開ドキュメント）  
+**プロジェクトタイプ**: ドキュメント/デプロイメントガイド  
+**パフォーマンス目標**: 初心者が 15 分以内にデプロイ可（SC-001）、クイックスタート 5 分（SC-003）  
+**制約**: 非技術ユーザー向けの明確性、完全なコマンド例、実装固有の詳細なし  
+**スコープ**: 主要セクション 5 つを含む README.md ファイル（目次、クイックスタート、Raspberry Pi ガイド、PC ガイド、Docker、トラブルシューティング、付録）
 
-## Constitution Check
+## 憲法チェック
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+*ゲート: フェーズ 0 研究前に合格必須。フェーズ 1 設計後に再確認。*
 
-| Principle | Status | Notes |
-|-----------|--------|-------|
-| I. 日本語優先 | ✅ PASS | README is English (GitHub standard), but spec and planning docs in Japanese. Documentation content honors clarity principle. |
-| II. Library-First | ⚠ N/A | Documentation for existing libraries, not creating new libraries. |
-| III. CLI Interface | ⚠ N/A | Documentation task, not CLI interface creation. |
-| IV. テスト優先 | ✅ PASS | Spec includes SC-004: "ユーザーがデプロイ手順について追加で質問する必要がない（README で十分）" - validates through user testing. |
-| V. 統合テスト重視 | ✅ PASS | Command samples in README will be validated for functional correctness (SC-004). |
+| 原則 | 状態 | 備考 |
+|------|------|------|
+| I. 日本語優先 | ✅ 合格 | README は英語（GitHub 標準）ですが、仕様と計画ドキュメントは日本語。ドキュメント内容が明確性原則を尊重。 |
+| II. ライブラリファースト | ⚠️ 非該当 | 既存ライブラリのドキュメント、新規ライブラリ作成ではない。 |
+| III. CLI インターフェース | ⚠️ 非該当 | ドキュメント作業であり、CLI インターフェース作成ではない。 |
+| IV. テスト優先 | ✅ 合格 | 仕様に SC-004 を含む: 「ユーザーがデプロイ手順について追加で質問する必要がない（README で十分）」- ユーザーテストによって検証。 |
+| V. 統合テスト重視 | ✅ 合格 | README のコマンドサンプルは機能的正確性で検証される（SC-004）。 |
 
-**Result**: PASS - Documentation task with no constitution violations. Proceeding to Phase 0.
+**結果**: 合格 - ドキュメント作業で憲法違反なし。フェーズ 0 に進行。
 
-## Project Structure
+## プロジェクト構造
 
-### Documentation (this feature)
+### ドキュメント（本機能）
 
 ```text
 specs/003-deployment-readme/
-├── plan.md              # This file
-├── research.md          # Phase 0: README structure options, best practices for deployment documentation
-├── data-model.md        # Phase 1: Content structure and section dependencies
-├── quickstart.md        # Phase 1: Deployment example scenarios
-├── contracts/           # Phase 1: README content contract (sections, format)
-└── tasks.md             # Phase 2: Documentation writing tasks (created by /speckit-tasks)
+├── plan.md              # このファイル
+├── research.md          # フェーズ 0: README 構造オプション、デプロイメント・ドキュメント・ベストプラクティス
+├── data-model.md        # フェーズ 1: コンテンツ構造・セクション依存関係
+├── quickstart.md        # フェーズ 1: デプロイメント例シナリオ
+├── contracts/           # フェーズ 1: README コンテンツコントラクト（セクション、形式）
+└── tasks.md             # フェーズ 2: ドキュメント作成タスク（/speckit-tasks で作成）
 ```
 
-### Deliverable (repository root)
+### 成果物（リポジトリルート）
 
 ```text
-README.md                # Main deployment documentation (NEW/UPDATED)
-├── Table of Contents
-├── Quick Start (5 minutes)
-├── Prerequisites & System Requirements
-├── Architecture Overview (text + diagram reference)
-├── Deployment Guides
-│   ├── Raspberry Pi WOL Service
-│   ├── PC Power Control API
-│   └── Docker Deployment (both services)
-├── Environment Variables Reference
-├── Troubleshooting Guide
-│   ├── Port conflicts
-│   ├── Permission errors
-│   ├── Network connectivity
-│   ├── Docker issues
-│   └── API health checks
-└── Additional Resources (links to DOCKER.md, CI-CD.md, etc.)
+README.md                # メイン・デプロイメント・ドキュメント（新規/更新）
+├── 目次
+├── クイックスタート（5 分）
+├── 前提条件・システム要件
+├── アーキテクチャ概要（テキスト + 図参照）
+├── デプロイメント・ガイド
+│   ├── Raspberry Pi WOL サービス
+│   ├── PC 電源制御 API
+│   └── Docker デプロイメント（両サービス）
+├── 環境変数リファレンス
+├── トラブルシューティング・ガイド
+│   ├── ポート競合
+│   ├── パーミッションエラー
+│   ├── ネットワーク接続
+│   ├── Docker 問題
+│   └── API ヘルスチェック
+└── その他リソース（DOCKER.md、CI-CD.md へのリンク）
 ```
 
-**Structure Decision**: Single README.md file serving as the primary entry point for new users. Existing docs (docs/DOCKER.md, docs/DEPLOYMENT.md, docs/CI-CD.md) remain as reference material. README provides beginner-friendly step-by-step instructions; docs/ provides technical deep-dives.
+**構造決定**: README.md ファイルが新規ユーザー向けプライマリエントリーポイント。既存ドキュメント（docs/DOCKER.md、docs/DEPLOYMENT.md、docs/CI-CD.md）はリファレンス資料として保持。README は初心者向けステップバイステップ指示、docs/ は技術的深堀りを提供。
 
-## Phase 0: Research
+## フェーズ 0: 研究
 
-### Key Questions to Resolve
+### 解決すべき主要質問
 
-1. **README Structure & Narrative Flow**
-   - Research: GitHub README best practices for multi-platform deployment documentation
-   - Research: Pyramid principle for organizing deployment content (quick-start → detailed guides)
-   - Decision: Top-level quick-start wins for time-pressed users; platform-specific sections follow
+1. **README 構造・ナラティブフロー**
+   - 研究: マルチプラットフォーム・デプロイメント・ドキュメントの GitHub README ベストプラクティス
+   - 研究: デプロイメント・コンテンツの論理的階層（クイックスタート → 詳細ガイド）
+   - 決定: 時間のないユーザー向けトップレベル・クイックスタート、プラットフォーム固有セクションが続く
 
-2. **Platform-Specific Instructions Coverage**
-   - Research: Command differences between Linux/macOS/Windows for Python/Docker setup
-   - Research: Network configuration differences for Raspberry Pi vs desktop environments
-   - Decision: Provide platform detection guidance; document primary path (Linux/macOS) with Windows notes
+2. **プラットフォーム固有の指示カバレッジ**
+   - 研究: Linux/macOS/Windows 間の Python・Docker セットアップコマンド差異
+   - 研究: Raspberry Pi と デスクトップ環境のネットワーク設定差異
+   - 決定: プラットフォーム検出ガイダンス提供、主要経路（Linux/macOS）を文書化、Windows での注記を含める
 
-3. **Troubleshooting Depth & Coverage**
-   - Research: Common deployment failure modes for Flask apps + Docker + Raspberry Pi
-   - Research: Port conflict diagnosis, permission error patterns, network debugging techniques
-   - Decision: Focus on 80% of common issues (port 5000/5001 conflicts, missing .env, SSH key issues)
+3. **トラブルシューティング深度・カバレッジ**
+   - 研究: Flask アプリ + Docker + Raspberry Pi のデプロイメント失敗モード
+   - 研究: ポート競合診断、パーミッションエラーパターン、ネットワークデバッグ手法
+   - 決定: 一般的問題の 80% に焦点（ポート 5000/5001 競合、.env 不足、SSH キー問題）
 
-4. **Command Sample Validation Strategy**
-   - Research: How to document commands that work across different shell environments
-   - Research: Environment variable syntax for .env files across platforms
-   - Decision: Use `docker compose` (V2) syntax; provide `.env.example` files with comments; test all samples before README publication
+4. **コマンドサンプル検証戦略**
+   - 研究: シェル環境間で機能するコマンド文書化方法
+   - 研究: .env ファイルのプラットフォーム間環境変数構文
+   - 決定: Docker Compose V2 構文使用、.env.example ファイルにコメント付き、README 公開前にサンプルすべてをテスト
 
-5. **Diagram & Visual Content**
-   - Research: ASCII diagram vs external image for README deployment architecture
-   - Decision: Use ASCII diagram in README for no external dependencies; reference existing architecture docs
+5. **図・ビジュアルコンテンツ**
+   - 研究: README デプロイメント・アーキテクチャ用 ASCII 図 vs 外部画像
+   - 決定: 外部依存なし ASCII 図を README で使用、既存アーキテクチャドキュメント参照
 
-## Phase 1: Design
+## フェーズ 1: 設計
 
-### README Content Model
+### README コンテンツモデル
 
-**Header Section**
-- Feature description: What is Power-On system?
-- Links to existing docs, repos, deployment status
+**ヘッダーセクション**
+- 機能説明: Power-On システムとは？
+- 既存ドキュメント、リポジトリ、デプロイメント状態へのリンク
 
-**Table of Contents (auto-generated)**
-- Anchor links to all major sections
+**目次（自動生成）**
+- すべての主要セクションへのアンカーリンク
 
-**Quick Start Section (5 minutes)**
-- Single-command deployment using docker compose
-- Expected output and success indicators
-- One success path only (Docker)
+**クイックスタート・セクション（5 分）**
+- Docker Compose ワンコマンド・デプロイメント
+- 期待される出力と成功インジケータ
+- 単一成功パス（Docker）のみ
 
-**Prerequisites**
-- System requirements: OS, RAM, disk space
-- Software requirements: Docker version, Python version (if native)
-- Network requirements: ports, firewall rules
-- Hardware requirements: for Raspberry Pi vs PC deployments
+**前提条件**
+- システム要件: OS、RAM、ディスク容量
+- ソフトウェア要件: Docker バージョン、Python バージョン（ネイティブの場合）
+- ネットワーク要件: ポート、ファイアウォールルール
+- ハードウェア要件: Raspberry Pi と PC デプロイメント向け
 
-**Architecture Overview**
-- Text description: Components (rpi-wol, pc-power, Docker registry)
-- Relationships and communication flows
-- Reference to diagram location
+**アーキテクチャ概要**
+- テキスト説明: コンポーネント（rpi-wol、pc-power、Docker レジストリ）
+- 関係と通信フロー
+- 図の位置へのリファレンス
 
-**Deployment Guides (4 options)**
-- Native Raspberry Pi (with systemd/cron)
-- Native PC (with systemd/Windows scheduled task notes)
-- Docker single-command
-- Docker Compose with environment configuration
+**デプロイメント・ガイド（4 オプション）**
+- ネイティブ Raspberry Pi（systemd/cron 使用）
+- ネイティブ PC（systemd/Windows タスク スケジューラー注記）
+- Docker ワンコマンド
+- Docker Compose・環境設定
 
-**Environment Variables**
-- Table format with variable name, purpose, default, example
-- .env file template with all variables
-- Platform-specific variations noted
+**環境変数**
+- テーブル形式：変数名、目的、デフォルト、例
+- すべての変数を含む .env ファイル・テンプレート
+- プラットフォーム固有の変更をメモ
 
-**Troubleshooting**
-- Organized by symptom (not cause)
-- Each entry: Symptom → diagnosis → solution
-- Links to health check endpoints and log files
+**トラブルシューティング**
+- 症状別（原因ではなく）に編成
+- 各エントリ: 症状 → 診断 → 解決方法
+- ヘルスチェック・エンドポイント、ログファイルへのリンク
 
-**Appendices**
-- Glossary: WOL, MAC address, broadcast IP
-- Related documentation: DOCKER.md, DEPLOYMENT.md, CI-CD.md
-- FAQ: Common questions beyond troubleshooting
+**付録**
+- 用語集: WOL、MAC アドレス、ブロードキャスト IP
+- 関連ドキュメント: DOCKER.md、DEPLOYMENT.md、CI-CD.md
+- FAQ: トラブルシューティング以上の一般的な質問
 
-### Content Contracts
+### コンテンツコントラクト
 
-**Quick Start Contract**
-- 5 minutes to working system, one command
-- No prerequisites other than Docker installed
-- Clear success criteria (API responds, Web UI loads)
+**クイックスタート・コントラクト**
+- ワンコマンド 5 分で動作中システム
+- Docker インストール以外の前提条件なし
+- 明確な成功基準（API 応答、Web UI 読み込み）
 
-**Deployment Guide Contract**
-- Step-by-step instructions for each platform
-- All commands copy-pasteable
-- Error messages and expected output shown
-- ~5-10 minutes per guide
+**デプロイメント・ガイド・コントラクト**
+- 各プラットフォーム向けステップバイステップ指示
+- すべてのコマンドがコピペ可能
+- エラーメッセージと期待される出力を表示
+- ガイドごと 5～10 分
 
-**Troubleshooting Contract**
-- 80% of common issues covered
-- Diagnostic steps for each issue
-- Links to logs and health check endpoints
+**トラブルシューティング・コントラクト**
+- 一般的問題の 80% をカバー
+- 各問題の診断ステップ
+- ログとヘルスチェック・エンドポイントへのリンク
 
-**Command Sample Contract**
-- All sample commands tested and working
-- Environment variables marked with ${VAR_NAME}
-- Platform-specific variations noted with [Linux/macOS/Windows] tags
+**コマンドサンプル・コントラクト**
+- すべてのサンプル・コマンドがテスト済み・動作中
+- 環境変数を `${VAR_NAME}` でマーク
+- プラットフォーム固有の変更を [Linux/macOS/Windows] タグで注記
 
-### Quickstart Scenarios
+### クイックスタート・シナリオ
 
-1. **Developer Quick-Start (5 min)**
-   - Clone repo → docker compose up → open http://localhost:5000
-   - Shows both services running
+1. **開発者クイックスタート（5 分）**
+   - クローン → docker compose up → http://localhost:5000 を開く
+   - 両サービスが実行中であることを表示
 
-2. **Raspberry Pi Deployment (10-15 min)**
-   - git clone → .env setup → docker compose up
-   - Verify with curl to health endpoints
-   - Test WOL with sample command
+2. **Raspberry Pi デプロイメント（10～15 分）**
+   - git clone → .env セットアップ → docker compose up
+   - curl でヘルスエンドポイント検証
+   - サンプル・コマンドで WOL をテスト
 
-3. **PC Deployment (10-15 min)**
-   - git clone → .env setup with PC_ADDRESS → docker compose up
-   - Verify API health
-   - Test shutdown endpoint
+3. **PC デプロイメント（10～15 分）**
+   - git clone → .env セットアップ（PC_ADDRESS とネットワーク値）→ docker compose up
+   - API ヘルスチェック検証
+   - シャットダウン・エンドポイントをテスト
 
-4. **Troubleshooting Walkthrough**
-   - Port already in use → change port in docker-compose.yml
-   - Cannot connect to PC → check PC_ADDRESS and network
-   - Docker image download fails → check internet and docker daemon
+4. **トラブルシューティング・ウォークスルー**
+   - ポート既に使用中 → docker-compose.yml でポート変更
+   - PC に接続不可 → PC_ADDRESS とネットワーク確認
+   - Docker イメージ・ダウンロード失敗 → インターネットと docker デーモン確認
 
-## Complexity Tracking
+## 複雑性追跡
 
-No constitution violations identified. This is a documentation task with clear success criteria defined in spec.md.
+憲法違反なし確認済み。これはドキュメント作業で、仕様書で定義された明確な成功基準があります。
