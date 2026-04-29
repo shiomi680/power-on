@@ -770,6 +770,68 @@ docker system prune
 
 ---
 
+## バージョン管理
+
+### version.json で ghcr.io イメージ・タグを管理
+
+このプロジェクトは `version.json` でバージョンを一元管理し、GitHub Actions が自動的に ghcr.io にタグをつけます。
+
+#### ステップ 1: バージョンを更新（PR 前に実施）
+
+```bash
+# version.json を編集
+nano version.json
+```
+
+**例**（バージョンアップ時）:
+```json
+{
+  "version": "1.1.0",
+  "description": "機能追加：XXXX"
+}
+```
+
+#### ステップ 2: コミット・PR
+
+```bash
+git add version.json
+git commit -m "chore: version bump to 1.1.0"
+git push origin feature-branch
+```
+
+#### ステップ 3: GitHub Actions が自動実行
+
+PR がマージされると、GitHub Actions が以下を実行：
+1. `version.json` から バージョン読み込み
+2. イメージをビルド
+3. ghcr.io に以下のタグでプッシュ：
+   - `ghcr.io/shiomi680/power-on/power-on-rpi:1.1.0`
+   - `ghcr.io/shiomi680/power-on/power-on-pc:1.1.0`
+   - `latest` タグも併用
+
+#### docker-compose.yml でバージョン参照
+
+```yaml
+services:
+  rpi-wol:
+    image: ghcr.io/shiomi680/power-on-rpi:1.1.0  # version.json と一致
+  pc-power:
+    image: ghcr.io/shiomi680/power-on-pc:1.1.0   # version.json と一致
+```
+
+#### 確認コマンド
+
+```bash
+# version.json を確認
+cat version.json
+
+# ビルド後、イメージタグを確認
+docker pull ghcr.io/shiomi680/power-on/power-on-rpi:1.1.0
+docker inspect ghcr.io/shiomi680/power-on/power-on-rpi:1.1.0 | grep RepoTags
+```
+
+---
+
 ## 関連ドキュメント
 
 詳細については以下を参照してください：

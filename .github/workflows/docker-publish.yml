@@ -45,6 +45,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Read version from version.json
+        id: version
+        run: |
+          VERSION=$(jq -r '.version' version.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -52,10 +58,9 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.image_name }}
           tags: |
             type=ref,event=branch
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha
+            type=raw,value=${{ steps.version.outputs.version }}
             type=raw,value=latest,enable={{is_default_branch}}
+            type=sha
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
