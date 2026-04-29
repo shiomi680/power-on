@@ -2,6 +2,30 @@
 
 Docker を使用して Power On システムをデプロイします。
 
+## 📋 デプロイメント方式
+
+### 開発・テスト環境
+
+**ルートディレクトリの `docker-compose.yml`** を使用:
+
+```bash
+docker compose up -d  # 両コンポーネントを起動
+```
+
+### 本番環境（推奨）
+
+**各コンポーネントの専用 `docker-compose.yml`** を使用:
+
+```bash
+# Raspberry Pi
+cd rpi-wol && docker compose up -d
+
+# PC（別のマシン）
+cd pc-power && docker compose up -d
+```
+
+→ 詳細は [DEPLOYMENT.md](DEPLOYMENT.md) を参照
+
 ## 前提条件
 
 - Docker 20.10+

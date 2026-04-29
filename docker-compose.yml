@@ -1,5 +1,10 @@
 version: '3.8'
 
+# 開発・テスト用統合 Compose ファイル
+# 本番環境では以下を使用してください：
+#   Raspberry Pi: rpi-wol/docker-compose.yml
+#   PC:          pc-power/docker-compose.yml
+
 services:
   # Raspberry Pi Web UI + WOL サービス
   rpi-wol:
