@@ -1,108 +1,108 @@
-# Feature Specification: Remote PC Power Control
+# 仕様書：リモートPC電源制御システム
 
-**Feature Branch**: `001-pc-power-control`  
-**Created**: 2026-04-29  
-**Status**: Draft  
-**Input**: User description: "Remote power control for PC from Android device using Raspberry Pi with Wake-on-LAN and Flask APIs"
+**機能ブランチ**: `001-pc-power-control`  
+**作成日**: 2026-04-29  
+**ステータス**: ドラフト  
+**入力**: ユーザー説明「PC、Android、Raspberry Piを使用したリモート電源制御。Android から PC の電源を ON/OFF 制御。Raspberry Pi に Flask を立てて WOL で PC に電源を入れる。PC にも Flask を立てて電源を切れる、状態も確認できる。」
 
-## User Scenarios & Testing *(mandatory)*
+## ユーザーシナリオ & テスト *(必須)*
 
-### User Story 1 - Android User Powers On PC (Priority: P1)
+### ユーザーストーリー 1 - Android から PC を電源ON（優先度: P1）
 
-An Android user wants to remotely turn on their PC when they're away from home. They send a power-on command from their Android device, which reaches the Raspberry Pi. The Raspberry Pi then broadcasts a Wake-on-LAN (WOL) magic packet to the PC, causing it to wake from sleep or powered-off state.
+Android ユーザーが離れた場所から自分の PC を遠隔で起動したい。Android デバイスから電源ON コマンドを送信し、Raspberry Pi に到達する。Raspberry Pi が Wake-on-LAN (WOL) マジックパケットを PC にブロードキャストして、PC をスリープまたは電源OFF 状態から起動する。
 
-**Why this priority**: Core functionality that enables the primary use case - remote power-on capability is the most valuable feature.
+**この優先度の理由**: コア機能として最も価値のあるユースケース。リモート起動機能がこのシステムの主要な目的。
 
-**Independent Test**: Can be fully tested by sending a power-on request from Android, receiving confirmation that WOL packet was sent, and verifying PC wakes up.
+**独立テスト**: Android から電源ON リクエストを送信 → Raspberry Pi が受信 → WOL パケット送信を確認 → PC が起動することで完全テスト可能。
 
-**Acceptance Scenarios**:
+**受け入れ条件**:
 
-1. **Given** Android device has network access and Raspberry Pi is running, **When** user taps power-on button on Android, **Then** Raspberry Pi receives the request and sends WOL packet to PC within 2 seconds
-2. **Given** PC is powered off or in sleep mode, **When** WOL packet is sent, **Then** PC turns on and boots successfully
-3. **Given** PC is already powered on, **When** power-on request is sent, **Then** system acknowledges request gracefully (does not cause errors)
-
----
-
-### User Story 2 - Android User Powers Off PC (Priority: P1)
-
-An Android user wants to remotely shut down their PC. They send a power-off command from their Android device, which reaches the PC directly. The PC receives the command and initiates a graceful shutdown.
-
-**Why this priority**: Core functionality - power-off is equally important as power-on for complete control.
-
-**Independent Test**: Can be fully tested by sending a shutdown request from Android, verifying PC receives it, and confirming PC shuts down within reasonable time.
-
-**Acceptance Scenarios**:
-
-1. **Given** PC is powered on and Flask server is running, **When** user taps power-off button on Android, **Then** PC receives shutdown command and initiates shutdown within 5 seconds
-2. **Given** PC is shutting down, **When** users send another command, **Then** system gracefully handles the request (either acknowledges ongoing shutdown or queues command)
+1. **Given** Android デバイスがネットワークアクセス可能、Raspberry Pi が起動している、**When** ユーザーが Android 上の電源ON ボタンをタップ、**Then** Raspberry Pi がリクエストを受信し 2 秒以内に WOL パケットを PC に送信
+2. **Given** PC が電源OFF またはスリープ状態、**When** WOL パケットが送信される、**Then** PC が起動して正常にブートする
+3. **Given** PC が既に起動状態、**When** 電源ON リクエストが送信される、**Then** システムがリクエストを適切に処理（エラーが発生しない）
 
 ---
 
-### User Story 3 - Android User Checks PC Status (Priority: P2)
+### ユーザーストーリー 2 - Android から PC を電源OFF（優先度: P1）
 
-An Android user wants to know whether their PC is currently powered on or off before deciding to send commands. They can request the current power status from the PC.
+Android ユーザーが離れた場所から自分の PC を遠隔でシャットダウンしたい。Android デバイスから電源OFF コマンドを送信し、PC に直接到達する。PC がコマンドを受信してグレースフルシャットダウンを開始する。
 
-**Why this priority**: High value - users want to verify the current state before sending commands, improves user experience and prevents confusion about command results.
+**この優先度の理由**: コア機能として、電源ON と同等に重要。完全な制御を提供するために不可欠。
 
-**Independent Test**: Can be fully tested by querying PC status and verifying the response accurately reflects whether PC is powered on or off.
+**独立テスト**: Android から電源OFF リクエストを送信 → PC が受信 → シャットダウン開始を確認 → PC がシャットダウンすることで完全テスト可能。
 
-**Acceptance Scenarios**:
+**受け入れ条件**:
 
-1. **Given** PC is powered on with Flask server running, **When** Android sends status query, **Then** PC responds with "online" status within 2 seconds
-2. **Given** PC is powered off, **When** Android sends status query, **Then** Raspberry Pi responds with "offline" status (PC cannot respond directly)
-3. **Given** PC is powered on but Flask server is not running, **When** Android sends status query, **Then** system responds with appropriate error or "unreachable" status
+1. **Given** PC が起動状態で Flask サーバーが動作中、**When** ユーザーが Android 上の電源OFF ボタンをタップ、**Then** PC がシャットダウンコマンドを受信し 5 秒以内にシャットダウンを開始
+2. **Given** PC がシャットダウン中、**When** ユーザーが別のコマンドを送信、**Then** システムがリクエストを適切に処理（進行中のシャットダウンを認識またはコマンドをキュー）
 
 ---
 
-### Edge Cases
+### ユーザーストーリー 3 - Android で PC の状態を確認（優先度: P2）
 
-- What happens if network connection drops between Android and Raspberry Pi?
-- How does the system handle when PC's WOL magic packet recipient is disabled in BIOS?
-- What happens if multiple power commands are sent in rapid succession?
-- How does system behave when Raspberry Pi loses network connectivity?
-- What if PC is in the middle of shutdown when another power-on command arrives?
+Android ユーザーが自分の PC が現在起動しているかどうかを知りたい。PC に状態クエリを送信して、現在の電源状態を確認できる。
 
-## Requirements *(mandatory)*
+**この優先度の理由**: 高い価値。ユーザーがコマンド送信前に状態確認を望む。UX 改善と混乱防止。
 
-### Functional Requirements
+**独立テスト**: PC に状態クエリを送信 → 状態が起動中か電源OFF かを応答確認 → 応答の正確性をテストで完全テスト可能。
 
-- **FR-001**: System MUST allow Android device to send power-on command to Raspberry Pi
-- **FR-002**: Raspberry Pi MUST receive power-on commands from Android and broadcast WOL magic packet to target PC MAC address
-- **FR-003**: System MUST allow Android device to send power-off command directly to PC
-- **FR-004**: PC MUST receive shutdown commands and initiate graceful system shutdown
-- **FR-005**: System MUST allow Android device to query the power status of PC
-- **FR-006**: Raspberry Pi MUST respond with PC status when queried by Android (either "online" or "offline")
-- **FR-007**: PC MUST respond with its status (online/available) when directly queried by Android
-- **FR-008**: Raspberry Pi MUST expose HTTP endpoint for receiving power-on requests from Android
-- **FR-009**: PC MUST expose HTTP endpoint for receiving shutdown requests from Android
-- **FR-010**: PC MUST expose HTTP endpoint for responding to status queries from Android
-- **FR-011**: System MUST handle cases where commands arrive when PC is already in target state (e.g., power-on when already on)
+**受け入れ条件**:
 
-### Key Entities
+1. **Given** PC が起動状態で Flask サーバーが動作中、**When** Android が状態クエリを送信、**Then** PC が 2 秒以内に「オンライン」ステータスで応答
+2. **Given** PC が電源OFF、**When** Android が状態クエリを送信、**Then** Raspberry Pi が「オフライン」ステータスで応答（PC は直接応答不可）
+3. **Given** PC が起動しているが Flask サーバーが動作していない、**When** Android が状態クエリを送信、**Then** システムが適切なエラーまたは「到達不可」ステータスで応答
 
-- **Android Client**: Mobile device sending control commands
-- **Raspberry Pi**: Intermediary device hosting power-on service, broadcasts WOL packets
-- **PC**: Target device receiving shutdown commands and status queries
-- **WOL Magic Packet**: Network packet containing PC's MAC address that wakes PC from sleep
-- **HTTP Endpoint**: Network interface for receiving and responding to commands
-- **PC Power State**: Current state tracked as "online" (powered on) or "offline" (powered off)
+---
 
-## Success Criteria *(mandatory)*
+### エッジケース
 
-### Measurable Outcomes
+- Android と Raspberry Pi 間でネットワーク接続が断絶した場合の動作
+- PC の BIOS で WOL マジックパケット受信が無効化されている場合
+- 複数の電源コマンドが短時間に連続送信される場合の動作
+- Raspberry Pi がネットワーク接続を失った場合のシステム動作
+- PC がシャットダウン中に別の電源ON コマンドが到着した場合
 
-- **SC-001**: Android user can turn PC on within 3 seconds of tapping power-on button (response time from Android to Raspberry Pi)
-- **SC-002**: PC completes shutdown within 30 seconds of receiving power-off command
-- **SC-003**: System accurately reports PC power status 95% of the time when queried
-- **SC-004**: All three operations (power-on, power-off, status check) are independently functional and testable
+## 要件 *(必須)*
 
-## Assumptions
+### 機能要件
 
-- Android device and Raspberry Pi are on the same network (or can communicate via network)
-- PC and Raspberry Pi are on the same network for WOL packet delivery
-- PC has WOL capability enabled in BIOS/firmware
-- PC's MAC address is known and configured in the Raspberry Pi
-- Users have basic network connectivity (WiFi or Ethernet)
-- Initial setup and configuration of network details (IP addresses, MAC addresses) is a separate process from this feature
-- Graceful shutdown is preferred over hard power-off
-- HTTP communication is acceptable for LAN environment (security hardening is out of scope for v1)
+- **FR-001**: システムが Android デバイスから Raspberry Pi への電源ON コマンド送信を許可
+- **FR-002**: Raspberry Pi が Android からの電源ON コマンドを受信し、対象 PC の MAC アドレスで WOL マジックパケットをブロードキャスト
+- **FR-003**: システムが Android デバイスから PC への直接的な電源OFF コマンド送信を許可
+- **FR-004**: PC がシャットダウンコマンドを受信してグレースフルシステムシャットダウンを実行
+- **FR-005**: システムが Android デバイスから PC の電源状態クエリを許可
+- **FR-006**: Raspberry Pi が Android からのクエリに応じて PC の状態を応答（「オンライン」または「オフライン」）
+- **FR-007**: PC が Android からのクエリに直接応答して状態を返信（オンライン/利用可能）
+- **FR-008**: Raspberry Pi が Android からの電源ON リクエストを受信する HTTP エンドポイントを公開
+- **FR-009**: PC がシャットダウンリクエストを受信する HTTP エンドポイントを公開
+- **FR-010**: PC が状態クエリに応答する HTTP エンドポイントを公開
+- **FR-011**: システムがコマンド到着時に PC が既に目標状態の場合を処理（例：既に起動状態での電源ON リクエスト）
+
+### キーエンティティ
+
+- **Android クライアント**: 制御コマンドを送信するモバイルデバイス
+- **Raspberry Pi**: 電源ON サービスをホストする中間デバイス、WOL パケットをブロードキャスト
+- **PC**: シャットダウンコマンドを受け取り、状態クエリに応答する対象デバイス
+- **WOL マジックパケット**: PC の MAC アドレスを含むネットワークパケット（PC をスリープから起動）
+- **HTTP エンドポイント**: コマンド受信と応答を行うネットワークインターフェース
+- **PC 電源状態**: 現在の状態を「オンライン」（起動中）または「オフライン」（電源OFF）として追跡
+
+## 成功基準 *(必須)*
+
+### 測定可能な成果
+
+- **SC-001**: Android ユーザーが電源ON ボタンをタップしてから 3 秒以内に PC が応答（Android → Raspberry Pi の応答時間）
+- **SC-002**: PC がシャットダウンコマンド受信から 30 秒以内にシャットダウン完了
+- **SC-003**: クエリ時の PC 電源状態報告の正確性が 95% 以上
+- **SC-004**: 3 つの操作（電源ON、電源OFF、状態確認）がすべて独立して機能・テスト可能
+
+## 前提条件
+
+- Android デバイスと Raspberry Pi が同じネットワーク上にある（またはネットワーク経由で通信可能）
+- PC と Raspberry Pi が同じネットワーク上にある（WOL パケット配信用）
+- PC が BIOS/ファームウェアで WOL 機能を有効化している
+- PC の MAC アドレスが既知で Raspberry Pi に設定されている
+- ユーザーが基本的なネットワーク接続を保有（WiFi またはイーサネット）
+- ネットワーク詳細情報（IP アドレス、MAC アドレス）の初期セットアップはこの機能の範外（別プロセス）
+- グレースフルシャットダウンが推奨（ハード電源OFF より優先）
+- LAN 環境では HTTP 通信が受け入れ可（セキュリティ強化は v1 では範外）

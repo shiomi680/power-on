@@ -1,34 +1,36 @@
-# Specification Quality Checklist: Remote PC Power Control
+# 仕様品質チェックリスト：リモートPC電源制御システム
 
-**Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-04-29
-**Feature**: [spec.md](../spec.md)
+**目的**: 計画・実装フェーズに進む前に仕様の完成度と品質を検証
+**作成日**: 2026-04-29
+**仕様**: [spec.md](../spec.md)
 
-## Content Quality
+## コンテンツ品質
 
-- [x] No implementation details (languages, frameworks, APIs)
-- [x] Focused on user value and business needs
-- [x] Written for non-technical stakeholders
-- [x] All mandatory sections completed
+- [x] 実装詳細が含まれていない（プログラミング言語、フレームワーク、API）
+- [x] ユーザー価値とビジネスニーズに焦点を当てている
+- [x] 技術者以外のステークホルダー向けに記述されている
+- [x] すべての必須セクションが完成している
 
-## Requirement Completeness
+## 要件の完全性
 
-- [x] No [NEEDS CLARIFICATION] markers remain
-- [x] Requirements are testable and unambiguous
-- [x] Success criteria are measurable
-- [x] Success criteria are technology-agnostic (no implementation details)
-- [x] All acceptance scenarios are defined
-- [x] Edge cases are identified
-- [x] Scope is clearly bounded
-- [x] Dependencies and assumptions identified
+- [x] [NEEDS CLARIFICATION] マーカーが残っていない
+- [x] 要件がテスト可能で明確である
+- [x] 成功基準が測定可能である
+- [x] 成功基準が技術非依存である（実装詳細が含まれていない）
+- [x] すべての受け入れシナリオが定義されている
+- [x] エッジケースが特定されている
+- [x] スコープが明確に制限されている
+- [x] 依存関係と前提条件が明記されている
 
-## Feature Readiness
+## 機能の準備状況
 
-- [x] All functional requirements have clear acceptance criteria
-- [x] User scenarios cover primary flows
-- [x] Feature meets measurable outcomes defined in Success Criteria
-- [x] No implementation details leak into specification
+- [x] すべての機能要件に明確な受け入れ基準がある
+- [x] ユーザーシナリオが主要フローをカバーしている
+- [x] 機能が成功基準で定義された測定可能な成果を満たしている
+- [x] 実装詳細が仕様に漏れていない
 
-## Notes
+## 注釈
 
-All items passed. Specification is complete and ready for clarification or planning phase.
+すべての項目が合格。仕様書は完全で、澄清フェーズまたは計画フェーズに進む準備ができています。
+
+日本語版への置き換え完了 - 次は計画フェーズへ進めます。
