@@ -1,23 +1,32 @@
 # 実装計画: ghcr.io プリビルト・イメージ・ワンコマンド・デプロイメント
 
-**ブランチ**: `004-ghcr-quick-deploy` | **日付**: 2026-04-29 | **仕様**: [specs/004-ghcr-quick-deploy/spec.md](spec.md)
-**入力**: `/specs/004-ghcr-quick-deploy/spec.md` の機能仕様
+**ブランチ**: `004-ghcr-quick-deploy` | **作成日**: 2026-04-30 | **仕様書**: [spec.md](spec.md)
+**入力**: `/specs/004-ghcr-quick-deploy/spec.md`
 
-## 概要
+**注記**: このドキュメントは `/speckit-plan` コマンドで記入されます。
 
-ghcr.io からのプリビルト・イメージを使用したワンコマンド・デプロイメント・ドキュメントを整備する。README.md を改善し、docker pull → docker compose up をデフォルト推奨方法として確立。git clone で docker-compose.yml を入手し、そのまま使用可能にすることで、初心者ユーザーの 2 分以内の起動、本番環境のバージョン・ピン指定による再現性が実現される。
+## サマリー
+
+ユーザーが `git clone` → `docker compose up` でシステムを即座に起動可能にするため、以下を実装します：
+
+- **ghcr.io プリビルト・イメージ・デフォルト**: docker-compose.yml で ghcr.io イメージをデフォルト参照
+- **pc-power・raspi の独立構成**: 各コンポーネント（pc-power/、rpi-wol/）に docker-compose.yml を配置し、ghcr.io イメージを指定
+- **ローカル・ビルド代替路**: docker-compose.local.yml でローカル・ビルド・パターンを提供（開発者向け）
+- **プラットフォーム別 README セクション**: Raspberry Pi インストール・セクション、PC インストール・セクション、想定構成・アーキテクチャを明確に分離
+- **ワンコマンド・デプロイメント**: `.env.example` から `.env` を編集して `docker compose up` で起動
 
 ## 技術コンテキスト
 
-**形式**: Markdown ドキュメント  
-**主要依存関係**: Docker (v20.10+)、docker-compose、ghcr.io (GitHub Container Registry)  
-**ストレージ**: N/A（ドキュメント・デプロイメント）  
-**テスト**: ドキュメント検証（コマンド実行可能性、明確性）  
-**対象プラットフォーム**: GitHub README（公開ドキュメント）、git リポジトリ  
-**プロジェクトタイプ**: ドキュメント更新  
-**パフォーマンス目標**: 2 分以内にシステム起動（SC-002）  
-**制約**: 初心者向け明確性、完全なコマンド例、バージョン管理  
-**スコープ**: README.md クイックスタート・セクション修正・拡張
+**形式/プラットフォーム**: ドキュメント + Docker Compose 設定ファイル  
+**主要依存関係**: Docker（v20.10+）、Docker Compose（v2.0+）、ghcr.io（プリビルト・イメージ）  
+**ストレージ**: なし（設定ファイル・ドキュメント のみ）  
+**テスト**: 実行テスト（docker compose up 検証、ヘルスチェック・エンドポイント確認）  
+**対象プラットフォーム**: Raspberry Pi（Linux）、PC（Linux/Windows/macOS）  
+**プロジェクトタイプ**: マルチ・コンポーネント・デプロイメント・ガイド + Docker 設定  
+**制約**: 
+- ユーザーは Docker インストール環境を前提
+- ghcr.io レジストリへのアクセス必須（パブリック・イメージ）
+- ローカル・ビルド・パターンは開発者向け（ビルド・ツール必須）
 
 ## 憲法チェック
 
@@ -25,13 +34,13 @@ ghcr.io からのプリビルト・イメージを使用したワンコマンド
 
 | 原則 | 状態 | 備考 |
 |------|------|------|
-| I. 日本語優先 | ✅ 合格 | ドキュメント・計画・コミットメッセージが日本語。技術用語（ghcr、Docker、github actions 等）は原語。 |
-| II. ライブラリファースト | ⚠️ 非該当 | ドキュメント・自動化作業であり、新規ライブラリ作成ではない。 |
-| III. CLI インターフェース | ⚠️ 非該当 | ドキュメント作業であり、CLI インターフェース作成ではない。 |
-| IV. テスト優先 | ✅ 合格 | SC-001～SC-005 で測定可能なテスト基準を定義。docker pull・docker compose up が実行可能で検証。 |
-| V. 統合テスト重視 | ✅ 合格 | docker pull + docker compose up のエンドツーエンド・デプロイメント検証。git clone + .env 設定 + docker compose up の統合検証。 |
+| I. 日本語優先 | ✅ 合格 | README セクション・ドキュメントは日本語で記述。技術用語（Docker、ghcr.io など）は原語のまま使用。 |
+| II. ライブラリファースト | ⚠️ 非該当 | 本機能はドキュメント・設定ファイル作業で、新規ライブラリ実装ではない。既存ライブラリの設定・紹介 |
+| III. CLI インターフェース | ⚠️ 非該当 | Docker Compose コマンド（docker compose up など）を使用。新規 CLI 開発ではない。 |
+| IV. テスト優先 | ✅ 合格 | スペックに受け入れシナリオ・テスト基準を明記。ドキュメント実装後に docker compose up で動作確認テスト。 |
+| V. 統合テスト重視 | ✅ 合格 | マルチ・コンポーネント（raspi WOL + PC API）統合デプロイメント・シナリオをテスト。 |
 
-**結果**: 合格 - ドキュメント+自動化作業で憲法違反なし。フェーズ 0 に進行。
+**結果**: 合格 - ドキュメント・設定ファイル作業で憲法違反なし。フェーズ 0 に進行。
 
 ## プロジェクト構造
 
@@ -39,92 +48,130 @@ ghcr.io からのプリビルト・イメージを使用したワンコマンド
 
 ```text
 specs/004-ghcr-quick-deploy/
-├── plan.md              # このファイル
-├── research.md          # フェーズ 0: docker-compose.yml 利用パターン、デプロイメント・ドキュメント構造、バージョン・ピン指定戦略
-├── data-model.md        # フェーズ 1: デプロイメント・モデル（git clone ベース）
-├── quickstart.md        # フェーズ 1: ワンコマンド・デプロイメント・シナリオ（3パス：git clone、バージョン・ピン、ローカル・ビルド）
-├── contracts/           # フェーズ 1: docker-compose.yml コントラクト
-└── tasks.md             # フェーズ 2: ドキュメント修正・実装タスク
+├── plan.md                        # このファイル
+├── spec.md                        # 仕様書（既存）
+├── tasks.md                       # フェーズ 2 で作成（/speckit-tasks コマンド）
+├── research.md                    # フェーズ 0: デプロイメント・ベストプラクティス
+├── data-model.md                  # フェーズ 1: 構成・スキーマ定義
+├── contracts/                     # フェーズ 1: docker-compose.yml スキーマ
+└── quickstart.md                  # フェーズ 1: デプロイメント例シナリオ
 ```
 
 ### 成果物（リポジトリルート）
 
 ```text
-README.md                # メイン・デプロイメント・ドキュメント（修正）
-├── 新規: ghcr.io イメージ・ワンコマンド・クイックスタート・セクション
-│   ├── git clone して docker compose up の手順
-│   ├── docker pull コマンド
-│   └── バージョン・ピン指定ガイド（本番環境向け）
-├── 更新: Docker デプロイメント・ガイド
-│   ├── ghcr.io イメージを主流として
-│   └── ローカル・ビルド（docker build）を代替として
-└── 更新: トラブルシューティング
-    └── イメージ・プル失敗、認証等を追加
-
-docker-compose.yml      # 既存ファイル（ghcr.io イメージ参照に更新）
-.env.example            # 既存ファイル（必要に応じて更新）
+.
+├── README.md                      # 更新：プラットフォーム別インストール・セクション分離
+├── .env.example                   # 既存：環境変数テンプレート
+├── docker-compose.yml             # 更新：ghcr.io イメージ + raspi デフォルト指定
+├── docker-compose.local.yml       # 新規：ローカル・ビルド・パターン（開発者向け）
+├── version.json                   # 既存：バージョン管理
+├── rpi-wol/
+│   ├── docker-compose.yml         # 新規：raspi 独立構成（ghcr.io イメージ）
+│   ├── docker-compose.local.yml   # 新規：raspi ローカル・ビルド・パターン
+│   └── ... (既存ファイル)
+├── pc-power/
+│   ├── docker-compose.yml         # 新規：pc 独立構成（ghcr.io イメージ）
+│   ├── docker-compose.local.yml   # 新規：pc ローカル・ビルド・パターン
+│   └── ... (既存ファイル)
+└── .github/
+    └── workflows/
+        └── docker-publish.yml     # 既存：CI/CD（ghcr.io 自動プッシュ）
 ```
 
-**構造決定**: README の「クイックスタート」セクションを ghcr.io イメージを中心に再編成。`git clone → .env 設定 → docker compose up` をデフォルト推奨方法として明確化。Release assets への docker-compose.yml 含含は実装しない（複雑性回避）。
+**構造の決定**:
+- **ghcr.io デフォルト**: docker-compose.yml はプリビルト・イメージ（ghcr.io）をデフォルト参照
+- **コンポーネント独立構成**: pc-power/ と rpi-wol/ に各々 docker-compose.yml を配置（他のコンポーネント不要なデプロイに対応）
+- **ローカル・ビルド代替**: docker-compose.local.yml でローカル・ビルド・パターンを提供（開発者・カスタマイズ用）
+- **README 分離**: raspi インストール・セクション、pc インストール・セクション、想定構成・アーキテクチャを明確に分離
 
 ## フェーズ 0: 研究
 
 ### 解決すべき主要質問
 
-1. **docker-compose.yml 利用パターン検証**
-   - 研究: git リポジトリに docker-compose.yml を保管・管理する方法
-   - 研究: ユーザーが git clone してそのまま使用可能な構成
-   - 決定: git repo の docker-compose.yml を single source of truth として利用
+1. **Docker Compose マルチプロジェクト・パターン**
+   - 決定: 各コンポーネント（pc-power/、rpi-wol/）に独立した docker-compose.yml を配置
+   - 理由: コンポーネント単体デプロイを可能にするため（raspi のみ、または pc のみ を構築可能）
 
-2. **デプロイメント・ドキュメント構造**
-   - 研究:初心者向けに明確な git clone → docker compose up フロー
-   - 研究: README での手順説明ベストプラクティス
-   - 決定: README に git clone → .env 設定 → docker compose up を段階的に記載
+2. **ghcr.io イメージ・バージョン指定**
+   - 決定: docker-compose.yml で明確なバージョン・タグを指定（例：`v1.0.0`）
+   - 理由: 本番環境の再現性・安定性確保
 
-3. **バージョン・ピン指定・戦略**
-   - 研究: docker-compose.yml でバージョン・ピン指定（v1.0.0）のベストプラクティス
-   - 研究: .env.example で環境変数デフォルト値の定義方法
-   - 決定: docker-compose.yml で image: ghcr.io/.../power-on-rpi:v1.0.0 のように具体的タグを指定
+3. **ローカル・ビルド・パターン**
+   - 決定: docker-compose.local.yml で `build:` オプションを使用（ローカル Dockerfile を参照）
+   - 理由: 開発者が修正・カスタマイズ後、ローカル・イメージで検証可能に
 
-## フェーズ 1: 設計・コントラクト
+4. **README セクション分離**
+   - 決定: クイックスタート（両コンポーネント）、raspi インストール、pc インストール、想定構成を明確に分離
+   - 理由: ユーザーが自分の環境に合わせたセクションを選択可能に
 
-### デプロイメント・モデル（data-model.md）
+## フェーズ 1: 設計
 
-**エンティティ**:
-- **DeploymentMethod**: デプロイ方法（GitClone、LocalBuild）
-- **DockerComposeFile**: docker-compose.yml ファイル（repo 保管）
-- **ImageSource**: イメージ・ソース（ghcr.io URL）
-- **VersionTag**: バージョン指定（v1.0.0、latest）
-- **EnvironmentVariable**: 環境変数（.env ファイル）
+### docker-compose.yml 構成モデル
 
-**関係**:
-- DeploymentMethod references DockerComposeFile
-- DockerComposeFile contains ImageSource
-- ImageSource specifies VersionTag
-- EnvironmentVariable referenced by docker-compose.yml
+**ルート docker-compose.yml**（両サービス統合）
+- raspi-wol サービス: ghcr.io イメージ（v1.0.0）
+- pc-power サービス: ghcr.io イメージ（v1.0.0）
+- Network: power-on-network
+- Health checks: 各サービスの /api/health エンドポイント
 
-### docker-compose.yml ファイル・コントラクト（contracts/）
+**pc-power/docker-compose.yml**（PC 単体）
+- pc-power サービス: ghcr.io イメージ（v1.0.0）
+- ポート: 5001
+- 環境変数: FLASK_HOST、FLASK_PORT、SHUTDOWN_TIMEOUT
 
-**コントラクト**: docker-compose.yml ファイル形式・必須フィールド
-- version: "3.8"
-- services: rpi-wol, pc-power
-  - image: ghcr.io/shiomi680/power-on-rpi:v1.0.0（ローカル build オーバーライド可能）
-  - ports: ["5000:5000"]、["5001:5001"]
-  - environment: PC_ADDRESS、WOL_TARGET_MAC 等
+**rpi-wol/docker-compose.yml**（Raspberry Pi 単体）
+- rpi-wol サービス: ghcr.io イメージ（v1.0.0）
+- ポート: 5000
+- 環境変数: FLASK_HOST、FLASK_PORT、PC_ADDRESS、WOL_TARGET_MAC、WOL_BROADCAST_IP
 
-### クイックスタート・シナリオ（quickstart.md）
+**docker-compose.local.yml**（ローカル・ビルド代替）
+- `build: { context: ./<component>, dockerfile: Dockerfile }` でローカル・イメージ構築
+- イメージ・タグ: power-on-rpi:local、power-on-pc:local（衝突回避）
 
-1. **推奨パス: Git Clone + docker compose up**
-   - git clone https://github.com/shiomi680/power-on
-   - cd power-on
-   - cp .env.example .env（編集）
-   - docker compose up -d
+### README コンテンツ・スキーマ
 
-2. **本番パス**: バージョン・ピン指定
-   - docker-compose.yml で image: ghcr.io/shiomi680/power-on-rpi:v1.0.0 指定
-   - docker compose up -d
+**セクション構成**:
+1. クイックスタート（5分）: ワンコマンド・デプロイ（両サービス）
+2. 想定構成・アーキテクチャ: システムコンポーネント・通信フロー図
+3. Raspberry Pi インストール: PC_ADDRESS、WOL_TARGET_MAC 設定、raspi 独立デプロイ
+4. PC インストール: PC 単体デプロイ方法
+5. ローカル・ビルド・カスタマイズ: docker-compose.local.yml 使用方法
+6. トラブルシューティング: 既存セクション
+7. 参考資料: DOCKER.md、CI-CD.md リンク
 
-3. **開発パス**: ローカル・ビルド
-   - docker build -t power-on-rpi:dev ./rpi-wol
-   - docker-compose.local.yml で build: override
-   - docker compose -f docker-compose.local.yml up -d
+### クイックスタート・シナリオ
+
+1. **開発者向けワンコマンド**
+   ```bash
+   git clone https://github.com/shiomi680/power-on
+   cd power-on
+   cp .env.example .env
+   docker compose up -d
+   curl http://localhost:5000/api/health  # raspi-wol 確認
+   curl http://localhost:5001/api/health  # pc-power 確認
+   ```
+
+2. **Raspberry Pi 単体デプロイ**
+   ```bash
+   cd rpi-wol
+   cp ../.env.example .env
+   # (PC_ADDRESS、WOL_TARGET_MAC を編集)
+   docker compose up -d
+   ```
+
+3. **PC 単体デプロイ**
+   ```bash
+   cd pc-power
+   docker compose up -d
+   ```
+
+4. **ローカル・ビルド・カスタマイズ**
+   ```bash
+   # イメージを編集
+   docker compose -f docker-compose.local.yml up -d
+   ```
+
+## 複雑性追跡
+
+憲法チェック合格。ドキュメント・設定ファイル作業のため、複雑性なし。
