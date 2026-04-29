@@ -770,64 +770,76 @@ docker system prune
 
 ---
 
-## バージョン管理
+## バージョン管理と ghcr.io 自動ビルド・プッシュ
 
-### version.json で ghcr.io イメージ・タグを管理
+### Git Tag で ghcr.io イメージをビルド・プッシュ
 
-このプロジェクトは `version.json` でバージョンを一元管理し、GitHub Actions が自動的に ghcr.io にタグをつけます。
+`v*` パターンで git tag を作成すると、GitHub Actions が自動的にイメージをビルドして ghcr.io にプッシュします。
 
-#### ステップ 1: バージョンを更新（PR 前に実施）
-
-```bash
-# version.json を編集
-nano version.json
-```
-
-**例**（バージョンアップ時）:
-```json
-{
-  "version": "1.1.0",
-  "description": "機能追加：XXXX"
-}
-```
-
-#### ステップ 2: コミット・PR
+#### ステップ 1: バージョンタグを作成
 
 ```bash
-git add version.json
-git commit -m "chore: version bump to 1.1.0"
-git push origin feature-branch
+# version.json でバージョン情報を管理（参考用）
+cat version.json
+# { "version": "1.0.0", ... }
+
+# git tag を作成（v で始まる tag が対象）
+git tag v1.0.0
+
+# タグをプッシュ
+git push origin v1.0.0
 ```
 
-#### ステップ 3: GitHub Actions が自動実行
+#### ステップ 2: GitHub Actions が自動実行
 
-PR がマージされると、GitHub Actions が以下を実行：
-1. `version.json` から バージョン読み込み
-2. イメージをビルド
-3. ghcr.io に以下のタグでプッシュ：
-   - `ghcr.io/shiomi680/power-on/power-on-rpi:1.1.0`
-   - `ghcr.io/shiomi680/power-on/power-on-pc:1.1.0`
-   - `latest` タグも併用
+tag push すると、GitHub Actions が以下を実行：
+1. イメージをビルド
+2. ghcr.io に以下のタグでプッシュ：
+   - `ghcr.io/shiomi680/power-on/power-on-rpi:1.0.0`
+   - `ghcr.io/shiomi680/power-on/power-on-pc:1.0.0`
+   - `ghcr.io/shiomi680/power-on/power-on-rpi:1` (major.minor)
+   - `ghcr.io/shiomi680/power-on/power-on-rpi:sha-<commit>` (SHA)
 
-#### docker-compose.yml でバージョン参照
+**所要時間**: 2-5 分
+
+#### ステップ 3: イメージを確認
+
+```bash
+# ビルド完了後、イメージを確認
+docker pull ghcr.io/shiomi680/power-on/power-on-rpi:1.0.0
+
+# タグを確認
+docker inspect ghcr.io/shiomi680/power-on/power-on-rpi:1.0.0 | grep RepoTags
+```
+
+#### docker-compose.yml でバージョンを指定
 
 ```yaml
 services:
   rpi-wol:
-    image: ghcr.io/shiomi680/power-on-rpi:1.1.0  # version.json と一致
+    image: ghcr.io/shiomi680/power-on-rpi:1.0.0
   pc-power:
-    image: ghcr.io/shiomi680/power-on-pc:1.1.0   # version.json と一致
+    image: ghcr.io/shiomi680/power-on-pc:1.0.0
 ```
 
-#### 確認コマンド
+#### バージョンアップ手順
 
 ```bash
-# version.json を確認
-cat version.json
+# 1. バージョン情報を更新（参考用）
+nano version.json
+# "version": "1.0.0" → "1.1.0"
 
-# ビルド後、イメージタグを確認
-docker pull ghcr.io/shiomi680/power-on/power-on-rpi:1.1.0
-docker inspect ghcr.io/shiomi680/power-on/power-on-rpi:1.1.0 | grep RepoTags
+# 2. コミット
+git add version.json
+git commit -m "chore: version bump to 1.1.0"
+git push origin main
+
+# 3. タグを作成・プッシュ
+git tag v1.1.0
+git push origin v1.1.0
+
+# 4. GitHub Actions が自動実行（2-5分）
+# → ghcr.io:1.1.0 でイメージをビルド・プッシュ
 ```
 
 ---
