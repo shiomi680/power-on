@@ -3,8 +3,14 @@ Raspberry Pi /api/power/on エンドポイント実装
 """
 
 from flask import Blueprint, request, jsonify
-from ..wol_service import WOLService
-from ..config import get_timestamp, WOL_BROADCAST_IP, WOL_PORT
+import sys
+from pathlib import Path
+
+# Add src to path for absolute imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from wol_service import WOLService
+from config import get_timestamp, WOL_BROADCAST_IP, WOL_PORT
 import logging
 
 logger = logging.getLogger(__name__)

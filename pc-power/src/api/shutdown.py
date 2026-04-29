@@ -3,8 +3,14 @@ PC /api/power/shutdown エンドポイント実装
 """
 
 from flask import Blueprint, request, jsonify
-from ..power_manager import PowerManager
-from ..config import get_timestamp, SHUTDOWN_TIMEOUT
+import sys
+from pathlib import Path
+
+# Add src to path for absolute imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from power_manager import PowerManager
+from config import get_timestamp, SHUTDOWN_TIMEOUT
 import logging
 
 logger = logging.getLogger(__name__)

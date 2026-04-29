@@ -5,7 +5,13 @@ PC へのシャットダウンリクエストをプロキシします
 """
 
 from flask import Blueprint, request, jsonify
-from ..config import get_timestamp, PC_API_TIMEOUT
+import sys
+from pathlib import Path
+
+# Add src to path for absolute imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from config import get_timestamp, PC_API_TIMEOUT
 import logging
 import requests
 

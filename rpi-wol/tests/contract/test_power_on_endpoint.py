@@ -6,25 +6,35 @@ import pytest
 import sys
 import json
 from pathlib import Path
+from unittest.mock import patch
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
 
+@pytest.fixture(scope="module")
+def mock_sendp():
+    """Mock sendp to prevent actual WOL packet sending"""
+    with patch("wol_service.sendp") as mock:
+        yield mock
+
+
+@pytest.fixture
+def app(mock_sendp):
+    """Flask test client fixture"""
+    from flask_app import app
+    app.config["TESTING"] = True
+    return app
+
+
+@pytest.fixture
+def client(app, mock_sendp):
+    """Flask test client"""
+    return app.test_client()
+
+
 class TestPowerOnEndpoint:
     """Power ON エンドポイントの contract テスト"""
-
-    @pytest.fixture
-    def app(self):
-        """Flask test client fixture"""
-        from flask_app import app
-        app.config["TESTING"] = True
-        return app
-
-    @pytest.fixture
-    def client(self, app):
-        """Flask test client"""
-        return app.test_client()
 
     def test_endpoint_exists(self, client):
         """エンドポイントが存在する"""
