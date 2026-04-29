@@ -1,23 +1,41 @@
 from flask import Flask, render_template, jsonify, request
 from config import FLASK_PORT, FLASK_HOST, FLASK_DEBUG, get_timestamp
+from api import power_on, status
 import logging
+import os
 
 # ロギング設定
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
+# テンプレートと静的ファイルのパス
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+template_dir = os.path.join(base_dir, "templates")
+static_dir = os.path.join(base_dir, "static")
+
 app = Flask(__name__,
-            template_folder="../templates",
-            static_folder="../static")
+            template_folder=template_dir,
+            static_folder=static_dir)
+
+# API ブループリント登録
+app.register_blueprint(power_on.bp)
+app.register_blueprint(status.bp)
+
 
 @app.route("/", methods=["GET"])
 def index():
     """Web UI メインページ"""
+    logger.info("Serving index page")
     return render_template("index.html")
+
 
 @app.route("/api/health", methods=["GET"])
 def health():
     """ヘルスチェックエンドポイント"""
+    logger.info("Health check requested")
     return jsonify({
         "status": "ok",
         "timestamp": get_timestamp()
