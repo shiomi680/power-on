@@ -1,16 +1,26 @@
 from flask import Flask, jsonify
 from config import FLASK_PORT, FLASK_HOST, FLASK_DEBUG, get_timestamp
+from api import shutdown, status
 import logging
 
 # ロギング設定
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
+# API ブループリント登録
+app.register_blueprint(shutdown.bp)
+app.register_blueprint(status.bp)
+
+
 @app.route("/api/health", methods=["GET"])
 def health():
     """ヘルスチェックエンドポイント"""
+    logger.info("Health check requested")
     return jsonify({
         "status": "ok",
         "timestamp": get_timestamp()

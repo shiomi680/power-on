@@ -1,6 +1,6 @@
 from flask import Flask, render_template, jsonify, request
 from config import FLASK_PORT, FLASK_HOST, FLASK_DEBUG, get_timestamp
-from api import power_on, status
+from api import power_on, status, shutdown
 import logging
 import os
 
@@ -23,6 +23,7 @@ app = Flask(__name__,
 # API ブループリント登録
 app.register_blueprint(power_on.bp)
 app.register_blueprint(status.bp)
+app.register_blueprint(shutdown.bp)
 
 
 @app.route("/", methods=["GET"])
