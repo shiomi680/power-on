@@ -6,11 +6,10 @@ version: '3.8'
 #   PC:          pc-power/docker-compose.yml
 
 services:
-  # Raspberry Pi Web UI + WOL サービス
+  # Raspberry Pi Web UI + WOL サービス（ghcr.io プリビルト・イメージ）
   rpi-wol:
-    build:
-      context: ./rpi-wol
-      dockerfile: Dockerfile
+    image: ghcr.io/shiomi680/power-on-rpi:v1.0.0
+    # ローカル・ビルド・オーバーライド: build: { context: ./rpi-wol, dockerfile: Dockerfile }
     container_name: power-on-rpi
     ports:
       - "5000:5000"
@@ -33,11 +32,10 @@ services:
       retries: 3
       start_period: 5s
 
-  # PC 電源管理サービス
+  # PC 電源管理サービス（ghcr.io プリビルト・イメージ）
   pc-power:
-    build:
-      context: ./pc-power
-      dockerfile: Dockerfile
+    image: ghcr.io/shiomi680/power-on-pc:v1.0.0
+    # ローカル・ビルド・オーバーライド: build: { context: ./pc-power, dockerfile: Dockerfile }
     container_name: power-on-pc
     ports:
       - "5001:5001"
