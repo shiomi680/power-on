@@ -44,13 +44,19 @@ class PowerManager:
             cmd = f"shutdown -h +{max(1, timeout // 60)}"
 
             logger.info(f"Executing shutdown command: {cmd}")
-            subprocess.run(cmd, shell=True, check=True, capture_output=True)
+            subprocess.run(cmd, shell=True, check=True, capture_output=True, timeout=2)
 
             return {
                 "status": "shutdown_initiated",
                 "timestamp": get_timestamp()
             }
 
+        except subprocess.TimeoutExpired:
+            logger.warning(f"Shutdown command timed out after 2s (may still be scheduled)")
+            return {
+                "status": "shutdown_initiated",
+                "timestamp": get_timestamp()
+            }
         except subprocess.CalledProcessError as e:
             logger.error(f"Failed to execute shutdown command: {e}")
             self.shutdown_in_progress = False
