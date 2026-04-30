@@ -11,20 +11,41 @@ PC シャットダウン・状態確認 API サーバー
 
 ## 使用方法
 
-### インストール
+### インストール（本番環境 - systemd service）
+
+```bash
+# 1. ディレクトリ準備
+sudo mkdir -p /opt/pc-power
+sudo cp -r . /opt/pc-power/
+cd /opt/pc-power
+
+# 2. Python パッケージインストール
+sudo pip install -e .
+
+# 3. 環境変数設定
+sudo cp .env.example .env
+sudo nano .env  # 必要に応じて編集
+
+# 4. systemd service インストール
+sudo cp pc-power.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable pc-power
+sudo systemctl start pc-power
+
+# 5. 状態確認
+sudo systemctl status pc-power
+sudo journalctl -u pc-power -f  # ログ確認
+```
+
+### 開発環境（Flask 直接起動）
 
 ```bash
 cd pc-power
 pip install -r requirements.txt
-```
-
-### Flask サーバー起動
-
-```bash
 python src/flask_app.py
 ```
 
-サーバーはデフォルトで `http://0.0.0.0:5000` で起動。
+サーバーはデフォルトで `http://0.0.0.0:5001` で起動。
 
 ### CLI コマンド
 
@@ -72,6 +93,47 @@ pytest tests/ --cov=src
 ## 設定
 
 環境変数で設定:
-- `FLASK_PORT`: Flask サーバーポート（デフォルト: 5000）
+- `FLASK_PORT`: Flask サーバーポート（デフォルト: 5001）
 - `LOG_LEVEL`: ログレベル（デフォルト: INFO）
 - `SHUTDOWN_TIMEOUT`: シャットダウンタイムアウト（デフォルト: 60 秒）
+
+## トラブルシューティング
+
+### service が起動しない
+
+```bash
+# ステータス確認
+sudo systemctl status pc-power
+
+# ログ確認
+sudo journalctl -u pc-power -n 50
+
+# 手動起動でエラー確認
+cd /opt/pc-power
+python3 -m pc_power.flask_app
+```
+
+### ポート競合エラー
+
+```bash
+# 別のプロセスが 5001 を使用していないか確認
+sudo lsof -i :5001
+
+# service の設定を変更
+sudo nano /etc/systemd/system/pc-power.service
+# EnvironmentFile=/opt/pc-power/.env で FLASK_PORT を変更
+
+sudo systemctl daemon-reload
+sudo systemctl restart pc-power
+```
+
+### シャットダウンコマンドが実行されない
+
+```bash
+# shutdown コマンドが利用可能か確認
+which shutdown
+shutdown --version
+
+# 権限確認（root で実行されているはず）
+ps aux | grep pc-power
+```

@@ -1,0 +1,31 @@
+[Unit]
+Description=PC 電源管理サービス - Flask API
+Documentation=file:///opt/pc-power/README.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/pc-power
+
+# 環境変数設定
+EnvironmentFile=/opt/pc-power/.env
+Environment="FLASK_HOST=0.0.0.0"
+Environment="FLASK_PORT=5001"
+Environment="PYTHONUNBUFFERED=1"
+
+# サービス起動コマンド
+ExecStart=/usr/bin/python3 -m pc_power.flask_app
+
+# 再起動ポリシー
+Restart=always
+RestartSec=10
+
+# セキュリティ設定
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=pc-power
+
+[Install]
+WantedBy=multi-user.target
