@@ -14,9 +14,10 @@ EnvironmentFile=/opt/pc-power/.env
 Environment="FLASK_HOST=0.0.0.0"
 Environment="FLASK_PORT=5001"
 Environment="PYTHONUNBUFFERED=1"
+Environment="PYTHONPATH=/opt/pc-power/src"
 
 # サービス起動コマンド
-ExecStart=/usr/bin/python3 -m pc_power.flask_app
+ExecStart=/usr/bin/python3 -m flask_app
 
 # 再起動ポリシー
 Restart=always
