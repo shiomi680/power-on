@@ -57,6 +57,11 @@
         </footer>
     </div>
 
+    <script>
+        // サーバー側から設定された値
+        window.PC_ADDRESS = "{{ pc_address }}";
+        window.WOL_TARGET_MAC = "{{ wol_target_mac }}";
+    </script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

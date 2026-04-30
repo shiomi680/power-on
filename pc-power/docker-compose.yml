@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 # PC 電源管理サービス - スタンドアロン構成
 # PC に単独でデプロイする場合に使用
@@ -18,8 +18,8 @@ services:
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
     restart: unless-stopped
     # host のシャットダウンを実行する場合は以下を有効化
-    # privileged: true
-    # pid: "host"
+    privileged: true
+    pid: "host"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5001/api/health"]
       interval: 30s

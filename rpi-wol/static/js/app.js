@@ -212,27 +212,33 @@ function showLoading(show) {
 
 /**
  * Get target PC MAC address
- * Can be configured via environment or stored in localStorage
+ * Priority: server config > localStorage > default
  */
 function getTargetMac() {
-    // Try to get from localStorage first
+    // First, try server-provided config
+    if (window.WOL_TARGET_MAC) return window.WOL_TARGET_MAC;
+
+    // Then try localStorage
     const stored = localStorage.getItem('targetMac');
     if (stored) return stored;
 
-    // Default fallback - should be configured
+    // Default fallback
     return 'aa:bb:cc:dd:ee:ff';
 }
 
 /**
  * Get PC IP address
- * Can be configured via environment or stored in localStorage
+ * Priority: server config > localStorage > default
  */
 function getPcAddress() {
-    // Try to get from localStorage first
+    // First, try server-provided config
+    if (window.PC_ADDRESS) return window.PC_ADDRESS;
+
+    // Then try localStorage
     const stored = localStorage.getItem('pcAddress');
     if (stored) return stored;
 
-    // Default fallback - should be configured
+    // Default fallback
     return '192.168.1.100';
 }
 

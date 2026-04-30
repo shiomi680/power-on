@@ -1,5 +1,5 @@
 from flask import Flask, render_template, jsonify, request
-from config import FLASK_PORT, FLASK_HOST, FLASK_DEBUG, get_timestamp
+from config import FLASK_PORT, FLASK_HOST, FLASK_DEBUG, get_timestamp, PC_ADDRESS, WOL_TARGET_MAC
 from api import power_on, status, shutdown
 import logging
 import os
@@ -30,7 +30,7 @@ app.register_blueprint(shutdown.bp)
 def index():
     """Web UI メインページ"""
     logger.info("Serving index page")
-    return render_template("index.html")
+    return render_template("index.html", pc_address=PC_ADDRESS, wol_target_mac=WOL_TARGET_MAC)
 
 
 @app.route("/api/health", methods=["GET"])
