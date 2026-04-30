@@ -6,7 +6,7 @@ version: '3.8'
 
 services:
   pc-power:
-    image: ghcr.io/shiomi680/power-on-pc:v1.0.0
+    image: ghcr.io/shiomi680/power-on/power-on-pc:v1.0.0
     # ローカル・ビルド・オーバーライド: docker compose -f docker-compose.local.yml up -d
     container_name: power-on-pc
     ports:

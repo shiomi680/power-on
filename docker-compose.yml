@@ -8,7 +8,7 @@ version: '3.8'
 services:
   # Raspberry Pi Web UI + WOL サービス（ghcr.io プリビルト・イメージ）
   rpi-wol:
-    image: ghcr.io/shiomi680/power-on-rpi:v1.0.0
+    image: ghcr.io/shiomi680/power-on/power-on-rpi:v1.0.0
     # ローカル・ビルド・オーバーライド: build: { context: ./rpi-wol, dockerfile: Dockerfile }
     container_name: power-on-rpi
     ports:
@@ -34,7 +34,7 @@ services:
 
   # PC 電源管理サービス（ghcr.io プリビルト・イメージ）
   pc-power:
-    image: ghcr.io/shiomi680/power-on-pc:v1.0.0
+    image: ghcr.io/shiomi680/power-on/power-on-pc:v1.0.0
     # ローカル・ビルド・オーバーライド: build: { context: ./pc-power, dockerfile: Dockerfile }
     container_name: power-on-pc
     ports:

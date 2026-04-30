@@ -6,7 +6,7 @@ version: '3.8'
 
 services:
   rpi-wol:
-    image: ghcr.io/shiomi680/power-on-rpi:v1.0.0
+    image: ghcr.io/shiomi680/power-on/power-on-rpi:v1.0.0
     # ローカル・ビルド・オーバーライド: docker compose -f docker-compose.local.yml up -d
     container_name: power-on-rpi
     ports:
