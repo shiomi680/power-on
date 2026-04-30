@@ -135,7 +135,7 @@ function startStatusPolling() {
  */
 async function pollStatus() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/health`, {
+        const response = await fetch(`${API_BASE_URL}/api/status`, {
             method: 'GET'
         });
 
