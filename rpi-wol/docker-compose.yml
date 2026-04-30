@@ -22,7 +22,7 @@ services:
       - WOL_BROADCAST_IP=${WOL_BROADCAST_IP:-255.255.255.255}
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/status"]
       interval: 30s
       timeout: 3s
       retries: 3
