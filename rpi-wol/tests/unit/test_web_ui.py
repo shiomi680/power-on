@@ -102,7 +102,7 @@ class TestWebUIStructure:
         js_file = project_root / "static" / "js" / "app.js"
         content = js_file.read_text(encoding="utf-8")
         assert "/api/power/on" in content
-        assert "/api/status" in content
+        assert "/api/health" in content
 
     def test_js_fetches_api(self, project_root):
         """JavaScript が fetch API を使用"""
