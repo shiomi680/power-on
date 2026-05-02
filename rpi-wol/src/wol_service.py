@@ -1,6 +1,6 @@
 # WOL (Wake-on-LAN) コアライブラリ
 
-from scapy.all import IP, UDP, Raw, send
+from wakeonlan import send_magic_packet
 from config import get_timestamp
 import logging
 
@@ -38,25 +38,6 @@ class WOLService:
             raise ValueError(f"Invalid MAC address format: {mac_address}")
         return True
 
-    @staticmethod
-    def create_magic_packet(mac_address):
-        """マジックパケットを生成
-
-        Args:
-            mac_address: ターゲット MAC アドレス
-
-        Returns:
-            bytes: マジックパケット
-        """
-        # MAC アドレスを正規化（コロン区切りに統一）
-        mac = mac_address.replace("-", ":")
-        mac_bytes = bytes.fromhex(mac.replace(":", ""))
-
-        # マジックパケット: FF * 6 + MAC * 16
-        magic_packet = b"\xff" * 6 + mac_bytes * 16
-
-        return magic_packet
-
     def send(self, mac_address):
         """WOL パケットを送信
 
@@ -74,15 +55,9 @@ class WOLService:
             # MAC アドレスの検証
             self.validate_mac(mac_address)
 
-            # マジックパケットの生成
-            magic_packet = self.create_magic_packet(mac_address)
-
-            # UDP パケットの構築
-            packet = IP(dst=self.broadcast_ip)/UDP(dport=self.port)/Raw(load=magic_packet)
-
-            # パケット送信
+            # WOL パケット送信
             logger.info(f"Sending WOL packet to {mac_address} on {self.broadcast_ip}:{self.port}")
-            send(packet, verbose=False)
+            send_magic_packet(mac_address, ip_address=self.broadcast_ip, port=self.port)
 
             return {
                 "status": "packet_sent",

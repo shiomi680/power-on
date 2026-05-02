@@ -64,51 +64,16 @@ class TestWOLService:
         with pytest.raises(ValueError):
             WOLService.validate_mac(mac)
 
-    def test_create_magic_packet_colon_format(self):
-        """マジックパケット生成: コロン形式の MAC"""
-        mac = "aa:bb:cc:dd:ee:ff"
-        packet = WOLService.create_magic_packet(mac)
-
-        # マジックパケットは 6 + 16*6 = 102 バイト
-        assert len(packet) == 102
-
-        # 最初の 6 バイトは FF FF FF FF FF FF
-        assert packet[:6] == b"\xff\xff\xff\xff\xff\xff"
-
-        # 次の 16 * 6 バイトは MAC アドレスの繰り返し
-        mac_bytes = bytes.fromhex("aabbccddeeff")
-        for i in range(16):
-            assert packet[6 + i*6:6 + (i+1)*6] == mac_bytes
-
-    def test_create_magic_packet_dash_format(self):
-        """マジックパケット生成: ダッシュ形式の MAC"""
-        mac = "aa-bb-cc-dd-ee-ff"
-        packet = WOLService.create_magic_packet(mac)
-
-        # コロン形式と同じ結果
-        mac_colon = "aa:bb:cc:dd:ee:ff"
-        packet_colon = WOLService.create_magic_packet(mac_colon)
-        assert packet == packet_colon
-
-    def test_create_magic_packet_uppercase(self):
-        """マジックパケット生成: 大文字の MAC"""
-        mac_lower = "aa:bb:cc:dd:ee:ff"
-        mac_upper = "AA:BB:CC:DD:EE:FF"
-
-        packet_lower = WOLService.create_magic_packet(mac_lower)
-        packet_upper = WOLService.create_magic_packet(mac_upper)
-
-        assert packet_lower == packet_upper
 
     def test_send_valid_mac(self, service, monkeypatch):
         """WOL パケット送信: 有効な MAC アドレス"""
-        # Mock send function
+        # Mock send_magic_packet function
         send_called = []
 
-        def mock_send(packet, verbose=False):
-            send_called.append((packet, verbose))
+        def mock_send_magic_packet(mac, ip_address=None, port=None):
+            send_called.append((mac, ip_address, port))
 
-        monkeypatch.setattr("wol_service.send", mock_send)
+        monkeypatch.setattr("wol_service.send_magic_packet", mock_send_magic_packet)
 
         # Send WOL packet
         result = service.send("aa:bb:cc:dd:ee:ff")
@@ -117,8 +82,9 @@ class TestWOLService:
         assert result["status"] == "packet_sent"
         assert "timestamp" in result
 
-        # Verify send was called
+        # Verify send_magic_packet was called
         assert len(send_called) == 1
+        assert send_called[0][0] == "aa:bb:cc:dd:ee:ff"
 
     def test_send_invalid_mac(self, service):
         """WOL パケット送信: 無効な MAC アドレス"""
@@ -127,10 +93,10 @@ class TestWOLService:
 
     def test_send_returns_timestamp(self, service, monkeypatch):
         """WOL パケット送信: タイムスタンプが含まれている"""
-        def mock_send(packet, verbose=False):
+        def mock_send_magic_packet(mac, ip_address=None, port=None):
             pass
 
-        monkeypatch.setattr("wol_service.send", mock_send)
+        monkeypatch.setattr("wol_service.send_magic_packet", mock_send_magic_packet)
 
         result = service.send("aa:bb:cc:dd:ee:ff")
 
