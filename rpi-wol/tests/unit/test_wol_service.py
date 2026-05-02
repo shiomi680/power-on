@@ -102,13 +102,13 @@ class TestWOLService:
 
     def test_send_valid_mac(self, service, monkeypatch):
         """WOL パケット送信: 有効な MAC アドレス"""
-        # Mock sendp function
-        sendp_called = []
+        # Mock send function
+        send_called = []
 
-        def mock_sendp(packet, verbose=False):
-            sendp_called.append((packet, verbose))
+        def mock_send(packet, verbose=False):
+            send_called.append((packet, verbose))
 
-        monkeypatch.setattr("wol_service.sendp", mock_sendp)
+        monkeypatch.setattr("wol_service.send", mock_send)
 
         # Send WOL packet
         result = service.send("aa:bb:cc:dd:ee:ff")
@@ -117,8 +117,8 @@ class TestWOLService:
         assert result["status"] == "packet_sent"
         assert "timestamp" in result
 
-        # Verify sendp was called
-        assert len(sendp_called) == 1
+        # Verify send was called
+        assert len(send_called) == 1
 
     def test_send_invalid_mac(self, service):
         """WOL パケット送信: 無効な MAC アドレス"""
@@ -127,10 +127,10 @@ class TestWOLService:
 
     def test_send_returns_timestamp(self, service, monkeypatch):
         """WOL パケット送信: タイムスタンプが含まれている"""
-        def mock_sendp(packet, verbose=False):
+        def mock_send(packet, verbose=False):
             pass
 
-        monkeypatch.setattr("wol_service.sendp", mock_sendp)
+        monkeypatch.setattr("wol_service.send", mock_send)
 
         result = service.send("aa:bb:cc:dd:ee:ff")
 

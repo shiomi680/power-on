@@ -1,6 +1,6 @@
 # WOL (Wake-on-LAN) コアライブラリ
 
-from scapy.all import Ether, IP, UDP, Raw, sendp
+from scapy.all import IP, UDP, Raw, send
 from config import get_timestamp
 import logging
 
@@ -82,7 +82,7 @@ class WOLService:
 
             # パケット送信
             logger.info(f"Sending WOL packet to {mac_address} on {self.broadcast_ip}:{self.port}")
-            sendp(packet, verbose=False)
+            send(packet, verbose=False)
 
             return {
                 "status": "packet_sent",
