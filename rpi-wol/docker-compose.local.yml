@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 # Raspberry Pi WOL サービス - ローカル・ビルド・パターン
 # 開発時に Dockerfile を修正して、ローカル・イメージをビルド・実行する場合に使用
@@ -21,6 +21,7 @@ services:
       - WOL_BROADCAST_IP=${WOL_BROADCAST_IP:-255.255.255.255}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
     restart: unless-stopped
+    network_mode: "host"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
       interval: 30s

@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 # Raspberry Pi WOL サービス - スタンドアロン構成
 # Raspberry Pi に単独でデプロイする場合に使用
@@ -21,6 +21,7 @@ services:
       - WOL_TARGET_MAC=${WOL_TARGET_MAC:-aa:bb:cc:dd:ee:ff}
       - WOL_BROADCAST_IP=${WOL_BROADCAST_IP:-255.255.255.255}
     restart: unless-stopped
+    network_mode: "host"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
       interval: 30s
